@@ -432,10 +432,15 @@ function love.draw()
 		love.graphics.circle("fill", love.graphics.getWidth() - 60 + PlayerPosition.x, 60 + PlayerPosition.y, PLAYER_RADIUS)
 
 		-- print planet in middle of screen
-		love.graphics.setColor(math.abs(PlayerPosition.x)/MAX_WIDTH, math.abs(PlayerPosition.y)/MAX_WIDTH, math.abs(PlayerPosition.x)/MAX_WIDTH, 1)
-		love.graphics.circle("fill", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, PLANET_RADIUS)
-		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.circle("line", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, PLANET_RADIUS)
+		local planet = love.graphics.newImage("planet.png")
+		-- rotate planet over time
+		local time = love.timer.getTime()
+		love.graphics.draw(planet, love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, time % (math.pi * 2), (PLANET_RADIUS * 2) / planet:getWidth(), (PLANET_RADIUS * 2) / planet:getHeight(), planet:getWidth() / 2, planet:getHeight() / 2)
+
+		-- love.graphics.setColor(math.abs(PlayerPosition.x)/MAX_WIDTH, math.abs(PlayerPosition.y)/MAX_WIDTH, math.abs(PlayerPosition.x)/MAX_WIDTH, 1)
+		-- love.graphics.circle("fill", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, PLANET_RADIUS)
+		-- love.graphics.setColor(1, 1, 1, 1)
+		-- love.graphics.circle("line", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, PLANET_RADIUS)
 
 		-- print resources
 		love.graphics.print("Fuel: " .. Resources.fuel, 10, 40)
@@ -445,6 +450,9 @@ function love.draw()
 
 		-- if at a new node, show the question and choices under the planet
 		if CurrentNode then
+			-- print robot in bottom left corner
+			local robot = love.graphics.newImage("robot.png")
+			love.graphics.draw(robot, 10, love.graphics.getHeight() - 110, 0, 100 / robot:getWidth(), 100 / robot:getHeight())
 			love.graphics.printf(CurrentNode.question, 0, love.graphics.getHeight() / 2 + PLANET_RADIUS + 20, love.graphics.getWidth(), "center")
 			for i, choice in ipairs(CurrentNode.choices) do
 				love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 200 + (i-1)*250, love.graphics.getHeight() / 2 + PLANET_RADIUS + 60, 200, 30)
