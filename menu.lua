@@ -1,36 +1,42 @@
-local loveli = require("LOVELi")
+local types = require("./types/main")
 
-local Menu = {}
+local Menu = {
+	navController = nil,
+	layoutmanager = nil,
+}
 
-function Menu:load()
-	local font = loveli.Property.parse(love.graphics.getFont() )
-	local textcolor = loveli.Property.parse(loveli.Color.parse(0xFFFFFFFF) )
-	local backgroundcolor = loveli.Property.parse(loveli.Color.parse(0xDF4794FF) )
-	label = loveli.Label:new{ text = "FPS: 0", font = font, textcolor = textcolor, x = 0, y = 0, width = 75, height = "auto" } 
-	layoutmanager = loveli.LayoutManager:new{}
-		:with(loveli.AbsoluteLayout:new{ width = "*", height = "*", margin = loveli.Thickness.parse(10) }
-			:with(label)
-			:with(loveli.Label:new{ text = "Press ESC to show layout lines", font = font, textcolor = loveli.Color.parse(0x00FF00FF), x = 0, y = 0, width = "auto", height = "auto", horizontaloptions = "center", verticaloptions = "end" } )
-			:with(loveli.Grid:new{ rowdefinitions = { "1*" }, columndefinitions = { "1*" }, x = 0, y = 0, width = "*", height = "*" }
-				:with(1, 1, loveli.StackLayout:new{ orientation = "vertical", spacing = 10, width = "auto", height = "auto", horizontaloptions = "center", verticaloptions = "center" }
-					:with(loveli.Label:new{ text = "LOVELi (LOVE Layout and GUI)", font = font, textcolor = textcolor, horizontaloptions = "center" } )			
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "New Game", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 150, height = 60, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Continue", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 150, height = 60, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Options", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 150, height = 60, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Credits", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 150, height = 60, horizontaloptions = "center" } )
-					:with(loveli.Button:new{ clicked = function(sender) print(sender:gettext() ) end, text = "Exit", font = font, textcolor = textcolor, backgroundcolor = backgroundcolor, bordercolor = textcolor, width = 150, height = 60, horizontaloptions = "center" } )
-				)
-			)
-		)
-	return stacklayout
+function Menu:load(navController)
+	-- create button in love2d ui to be clicked and navigate to gameplay state
+	local layoutmanager = {}
+	function layoutmanager:draw()
+		love.graphics.clear(0.1, 0.1, 0.1, 1)
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.printf("Main Menu", 0, 100, love.graphics.getWidth(), "center")
+		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 - 25, 100, 50)
+		love.graphics.printf("Start Game", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() / 2 - 10, 100, "center")
+	end
+	function layoutmanager:update(dt)
+		if love.mouse.isDown(1) then
+			local mx, my = love.mouse.getPosition()
+			if mx >= love.graphics.getWidth() / 2 - 50 and mx <= love.graphics.getWidth() / 2 + 50 and
+			   my >= love.graphics.getHeight() / 2 - 25 and my <= love.graphics.getHeight() / 2 + 25 then
+				if Menu.navController and Menu.navController.navigateTo then
+					Menu.navController:navigateTo(types.GameStateType.Gameplay)
+				else print("NavController or navigateTo function not defined")
+				end
+			end
+		end
+	end
+	Menu.layoutmanager = layoutmanager
+	Menu.navController = navController
 end
 
 function Menu:draw()
-	layoutmanager:draw()
+	Menu.layoutmanager:draw()
 end
 
 function Menu:update(dt)
-	layoutmanager:update(dt)
+	Menu.layoutmanager:update(dt)
 end
 
 return Menu
