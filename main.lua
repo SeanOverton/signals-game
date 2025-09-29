@@ -12,7 +12,7 @@ local PlayerPosition = { x = 0, y = 0 }
 local MAX_WIDTH = 50
 local PLAYER_RADIUS = 5;
 
-local DEFAULT_FUEL = 100
+local DEFAULT_FUEL = 30
 local DEFAULT_OXYGEN = 100
 local DEFAULT_MONEY = 50
 local DEFAULT_SIGNALS = 0
@@ -26,6 +26,7 @@ local Resources = {
 local CurrentNode = nil
 
 local PLANET_RADIUS = 120;
+local PreviouslyVisitedCoords = {}
 
 function resetGame()
 	PlayerPosition = { x = 0, y = 0 }
@@ -33,17 +34,22 @@ function resetGame()
 	Resources.oxygen = DEFAULT_OXYGEN
 	Resources.money = DEFAULT_MONEY
 	Resources.signals = DEFAULT_SIGNALS
+	PreviouslyVisitedCoords = {}
 	CurrentNode = nil
 end
 
 -- config for choices at each planet, or spaceship or alien encounter etc.
 local NODE_OPTIONS = {
 	{
-		question = "You encounter a friendly alien. Do you want to trade? It will cost 10 money but give you 20 fuel.",
+		question = "You encounter a friendly alien. Do you want to trade? It will cost 15 money but give you 10 fuel.",
 		choices = {
 			{ text = "Yes", effect = function() 
-				Resources.money = Resources.money - 10
-				Resources.fuel = Resources.fuel + 20
+				if Resources.money < 15 then 
+					print("Not enough money to trade with alien.")
+					return 
+				end
+				Resources.money = Resources.money - 15
+				Resources.fuel = Resources.fuel + 10
 			end },
 			{ text = "No", effect = function() print("Ignored alien") end },
 		}
@@ -52,8 +58,8 @@ local NODE_OPTIONS = {
 		question = "You find an abandoned spaceship. Do you want to scavenge it? It might have useful resources.",
 		choices = {
 			{ text = "Yes", effect = function() 
-				local foundFuel = math.random(5, 15)
-				local foundOxygen = math.random(5, 15)
+				local foundFuel = math.random(2, 8)
+				local foundOxygen = math.random(2, 8)
 				Resources.fuel = Resources.fuel + foundFuel
 				Resources.oxygen = Resources.oxygen + foundOxygen
 				print("Found " .. foundFuel .. " fuel and " .. foundOxygen .. " oxygen.")
@@ -62,11 +68,11 @@ local NODE_OPTIONS = {
 		}
 	},
 	{
-		question = "You encounter a space storm. Do you want to navigate through it? It will cost 15 fuel but save you time.",
+		question = "You encounter a space storm. Do you want to navigate through it? It will cost 20 fuel but save you time.",
 		choices = {
 			{ text = "Yes", effect = function() 
-				Resources.fuel = Resources.fuel - 15
-				print("Navigated through the storm, but lost 15 fuel.")
+				Resources.fuel = Resources.fuel - 20
+				print("Navigated through the storm, but lost 20 fuel.")
 			end },
 			{ text = "No", effect = function() print("Avoided the storm, took longer route.") end },
 		}
@@ -77,11 +83,11 @@ local NODE_OPTIONS = {
 			{ text = "Yes", effect = function() 
 				local risk = math.random()
 				if risk < 0.5 then
-					local foundOxygen = math.random(10, 20)
+					local foundOxygen = math.random(5, 12)
 					Resources.oxygen = Resources.oxygen + foundOxygen
 					print("Found " .. foundOxygen .. " oxygen in the station.")
 				else
-					local lostFuel = math.random(5, 15)
+					local lostFuel = math.random(10, 20)
 					Resources.fuel = Resources.fuel - lostFuel
 					print("Encountered problems in the station, lost " .. lostFuel .. " fuel.")
 				end
@@ -94,12 +100,12 @@ local NODE_OPTIONS = {
 		choices = {
 			{ text = "Yes", effect = function() 
 				local outcome = math.random()
-				if outcome < 0.4 then
-					local foundMoney = math.random(10, 30)
+				if outcome < 0.3 then
+					local foundMoney = math.random(5, 15)
 					Resources.money = Resources.money + foundMoney
 					print("The signal led to a hidden cache! Found " .. foundMoney .. " money.")
 				elseif outcome < 0.8 then
-					local lostOxygen = math.random(5, 15)
+					local lostOxygen = math.random(10, 20)
 					Resources.oxygen = Resources.oxygen - lostOxygen
 					print("The signal was a trap! Lost " .. lostOxygen .. " oxygen.")
 				else
@@ -110,11 +116,10 @@ local NODE_OPTIONS = {
 		}
 	},
 	{
-		-- random chance of finding a signal
 		question = "You detect a faint signal in the distance. Do you want to follow it? It might lead to something valuable.",
 		choices = {
 			{ text = "Yes", effect = function() 
-				local foundSignal = math.random() < 0.7
+				local foundSignal = math.random() < 0.5
 				if foundSignal then
 					Resources.signals = Resources.signals + 1
 					print("You successfully traced the signal and collected it! Total signals: " .. Resources.signals)
@@ -124,7 +129,136 @@ local NODE_OPTIONS = {
 			end },
 			{ text = "No", effect = function() print("Decided not to follow the faint signal.") end },
 		}
-	}
+	},
+	{
+		question = "You find a floating crate. Do you want to open it? It might contain useful supplies.",
+		choices = {
+			{ text = "Yes", effect = function() 
+				local foundItem = math.random()
+				if foundItem < 0.4 then
+					local foundFuel = math.random(2, 6)
+					Resources.fuel = Resources.fuel + foundFuel
+					print("Found " .. foundFuel .. " fuel in the crate.")
+				elseif foundItem < 0.7 then
+					local foundOxygen = math.random(2, 6)
+					Resources.oxygen = Resources.oxygen + foundOxygen
+					print("Found " .. foundOxygen .. " oxygen in the crate.")
+				else
+					local lostMoney = math.random(10, 20)
+					Resources.money = math.max(Resources.money - lostMoney, 0)
+					print("The crate was a trap! Lost " .. lostMoney .. " money.")
+				end
+			end },
+			{ text = "No", effect = function() print("Left the crate unopened.") end },
+		}
+	},
+	{
+		question = "You encounter a derelict satellite. Do you want to salvage it? It might have useful components.",
+		choices = {
+			{ text = "Yes", effect = function() 
+				local foundFuel = math.random(2, 8)
+				local foundOxygen = math.random(2, 8)
+				Resources.fuel = Resources.fuel + foundFuel
+				Resources.oxygen = Resources.oxygen + foundOxygen
+				print("Salvaged the satellite and found " .. foundFuel .. " fuel and " .. foundOxygen .. " oxygen.")
+			end },
+			{ text = "No", effect = function() print("Decided not to salvage the satellite.") end },
+		}
+	},
+	{
+		question = "You come across a space anomaly. Do you want to investigate? It could be dangerous but might yield rewards.",
+		choices = {
+			{ text = "Yes", effect = function() 
+				local outcome = math.random()
+				if outcome < 0.2 then
+					local foundMoney = math.random(10, 20)
+					Resources.money = Resources.money + foundMoney
+					print("The anomaly contained valuable resources! Found " .. foundMoney .. " money.")
+				elseif outcome < 0.7 then
+					local lostFuel = math.random(15, 25)
+					Resources.fuel = Resources.fuel - lostFuel
+					print("The anomaly was hazardous! Lost " .. lostFuel .. " fuel.")
+				else
+					print("The anomaly was a false alarm. Nothing happened.")
+				end
+			end },
+			{ text = "No", effect = function() print("Chose to avoid the space anomaly.") end },
+		},
+	},
+	{
+		question = "You detect a distress signal from another spaceship. Do you want to respond? It could be a trap or an opportunity to help.",
+		choices = {
+			{ text = "Yes", effect = function() 
+				local outcome = math.random()
+				if outcome < 0.3 then
+					local foundSignals = math.random(1, 2)
+					Resources.signals = Resources.signals + foundSignals
+					print("Rescued the crew and they rewarded you! Gained " .. foundSignals .. " signals.")
+				else
+					local lostOxygen = math.random(15, 25)
+					Resources.oxygen = Resources.oxygen - lostOxygen
+					print("It was a trap! Lost " .. lostOxygen .. " oxygen.")
+				end
+			end },
+			{ text = "No", effect = function() print("Ignored the distress signal.") end },
+		}
+	},
+	{
+		question = "You find a hidden asteroid field. Do you want to mine it? It could yield resources but is risky.",
+		choices = {
+			{ text = "Yes", effect = function() 
+				local risk = math.random()
+				if risk < 0.3 then
+					local foundMoney = math.random(10, 20)
+					Resources.money = Resources.money + foundMoney
+					print("Successfully mined the asteroid field! Found " .. foundMoney .. " money.")
+				else
+					local lostFuel = math.random(15, 25)
+					Resources.fuel = Resources.fuel - lostFuel
+					print("Hit by debris while mining! Lost " .. lostFuel .. " fuel.")
+				end
+			end },
+			{ text = "No", effect = function() print("Decided not to mine the asteroid field.") end },
+		}
+	},
+	{
+		question = "You encounter a rogue space pirate. Do you want to engage in combat? It could yield loot but is dangerous.",
+		choices = {
+			{ text = "Yes", effect = function() 
+				local outcome = math.random()
+				if outcome < 0.3 then
+					local foundMoney = math.random(15, 30)
+					Resources.money = Resources.money + foundMoney
+					print("Defeated the pirate and looted their ship! Found " .. foundMoney .. " money.")
+				else
+					local lostOxygen = math.random(20, 35)
+					Resources.oxygen = Resources.oxygen - lostOxygen
+					print("The pirate was too strong! Lost " .. lostOxygen .. " oxygen.")
+				end
+			end },
+			{ text = "No", effect = function() print("Avoided the space pirate.") end },
+		}
+	},
+	{
+		question = "You come across a derelict alien ship. Do you want to board it? It could have advanced technology but might be dangerous.",
+		choices = {
+			{ text = "Yes", effect = function() 
+				local outcome = math.random()
+				if outcome < 0.2 then
+					local foundSignals = math.random(1, 3)
+					Resources.signals = Resources.signals + foundSignals
+					print("Discovered advanced alien tech! Gained " .. foundSignals .. " signals.")
+				elseif outcome < 0.6 then
+					local lostFuel = math.random(15, 30)
+					Resources.fuel = Resources.fuel - lostFuel
+					print("The ship was booby-trapped! Lost " .. lostFuel .. " fuel.")
+				else
+					print("The ship was empty. Nothing happened.")
+				end
+			end },
+			{ text = "No", effect = function() print("Decided not to board the alien ship.") end },
+		}
+	},
 }
 
 function love.load()
@@ -251,8 +385,10 @@ function love.update(dt)
 		end
 	end
 end
+
 function handleNavigateToNewNode()
 	CurrentNode = NODE_OPTIONS[math.random(1, #NODE_OPTIONS)]
+	table.insert(PreviouslyVisitedCoords, { x = PlayerPosition.x, y = PlayerPosition.y })
 	return { math.random(), math.random(), math.random(), 1 }
 end
 
@@ -287,6 +423,12 @@ function love.draw()
 	
 		-- print minimap of the game area in the top-right corner
 		love.graphics.rectangle("line", love.graphics.getWidth() - 110, 10, 100, 100)
+		-- mark previously visited coords on minimap
+		for _, coord in ipairs(PreviouslyVisitedCoords) do
+			love.graphics.setColor(0, 1, 0, 1)
+			love.graphics.circle("fill", love.graphics.getWidth() - 60 + coord.x, 60 + coord.y, PLAYER_RADIUS)
+			love.graphics.setColor(1, 1, 1, 1)
+		end	
 		love.graphics.circle("fill", love.graphics.getWidth() - 60 + PlayerPosition.x, 60 + PlayerPosition.y, PLAYER_RADIUS)
 
 		-- print planet in middle of screen
