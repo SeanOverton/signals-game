@@ -36,6 +36,7 @@ function resetGame()
 	Resources.signals = DEFAULT_SIGNALS
 	PreviouslyVisitedCoords = {}
 	CurrentNode = nil
+	PreviousNode = nil
 end
 
 -- config for choices at each planet, or spaceship or alien encounter etc.
@@ -296,8 +297,16 @@ function love.update(dt)
 			return
 		end
 
+		local visited = false
+		for _, coord in ipairs(PreviouslyVisitedCoords) do
+			if coord.x == PlayerPosition.x and coord.y == PlayerPosition.y then
+				visited = true
+				break
+			end
+		end
+
 		-- handle mouse click on choices
-		if CurrentNode and love.mouse.isDown(1) then
+		if not visited and CurrentNode and love.mouse.isDown(1) then
 			local mx, my = love.mouse.getPosition()
 			for i, choice in ipairs(CurrentNode.choices) do
 				if
