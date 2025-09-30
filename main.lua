@@ -1,159 +1,169 @@
 local types = require("./types/main")
+local constants = require("./constants")
 
--- const title
-local GAME_TITLE = "Signals"
+local SETTINGS = {
+	-- @todo implement settings for speeds, volumes, difficulties etc.
+	-- currently some are just scattered
+}
+
+-- placeholder for player ship, currently no stats or upgrades
+local PlayerShip = {
+	MAX_PASSENGERS = 3
+}
+
+-- global vars/state shared between constants.luan for config
+Resources = {
+	fuel = constants.DEFAULT_RESOURCES.FUEL,
+	oxygen = constants.DEFAULT_RESOURCES.OXYGEN,
+	money = constants.DEFAULT_RESOURCES.MONEY,
+	signals = constants.DEFAULT_RESOURCES.SIGNALS,
+}
+PlayerPassengers = {}
+-- more game state vars
+local PlayerPosition = { x = 0, y = 0 }
+local CurrentNode = nil
+local PreviouslyVisitedCoords = {}
 
 local Menu = {
 	navController = nil,
 	layoutmanager = nil,
 }
 
-local PlayerPosition = { x = 0, y = 0 }
-local MAX_WIDTH = 50
-local PLAYER_RADIUS = 5
+-- typing effect variables (should be localised)
+local charIndex = 0
+local typingSpeed = 0.01 -- Time in seconds between each character
+local timer = 0
+local displayedText = ""
 
-local DEFAULT_FUEL = 30
-local DEFAULT_OXYGEN = 100
-local DEFAULT_MONEY = 50
-local DEFAULT_SIGNALS = 0
+-- moving nodes variables
+local PreviousNode = nil
+local PrevPlanetPosition = { x = 0, y = 0 }
+local Moving = false
+local Direction = nil
+local NewPlanetPosition = { x = 0, y = 0 }
 
-local Resources = {
-	fuel = DEFAULT_FUEL,
-	oxygen = DEFAULT_OXYGEN,
-	money = DEFAULT_MONEY,
-	signals = DEFAULT_SIGNALS,
+function markNodeAsVisited()
+	table.insert(PreviouslyVisitedCoords, { x = PlayerPosition.x, y = PlayerPosition.y })
+end
+
+local PassengerNodeHandler = {
+	randomPassengers = {},
+	load = function(self)
+		-- initiliases anything for the node when it is randomly selected
+		-- eg. random choices or shop stuff etc.
+		local randomPassengers = {}
+		while #randomPassengers < math.min(#constants.Passengers, 2) do
+			local candidate = constants.Passengers[math.random(1, #constants.Passengers)]
+			local alreadyChosen = false
+			for _, p in ipairs(randomPassengers) do
+				if p.name == candidate.name then
+					alreadyChosen = true
+					break
+				end
+			end
+			if not alreadyChosen then
+				table.insert(randomPassengers, candidate)
+			end
+		end
+		self.randomPassengers = randomPassengers
+	end,
+	update = function(self, dt)
+		-- handle passenger specific updates if needed
+		-- passenger choices have images
+		-- event handlers for anything drawn
+		-- also handle anything else specific to the node logic
+		for i, passenger in ipairs(self.randomPassengers) do
+			if passenger then
+				-- handle mouse click on passenger choice
+				if love.mouse.isDown(1) then
+					local mx, my = love.mouse.getPosition()
+					if
+						mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
+						and mx <= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 200
+						and my >= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60
+						and my <= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 160
+					then
+						-- add passenger to Passenger list if space
+						if #PlayerPassengers >= PlayerShip.MAX_PASSENGERS then
+							return
+						end
+						table.insert(PlayerPassengers, passenger)
+						markNodeAsVisited()
+					end
+				end
+			end
+		end
+	end,
+	draw = function(self)
+		-- draws node specific stuff, ie. choices here... todo move more here?
+		for i, passenger in ipairs(self.randomPassengers) do
+			local img = love.graphics.newImage(passenger.image)
+			love.graphics.rectangle(
+				"line",
+				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250+40,
+				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60,
+				120,
+				100
+			)
+			love.graphics.draw(
+				img,
+				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 75,
+				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 70,
+				0,
+				50 / img:getWidth(),
+				50 / img:getHeight()
+			)
+			love.graphics.printf(
+				passenger.name,
+				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
+				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 140,
+				200,
+				"center"
+			)
+		end
+	end,
 }
-local CurrentNode = nil
-
-local PLANET_RADIUS = 120
-local PreviouslyVisitedCoords = {}
 
 function resetGame()
+	-- todo should force garbage collection of old nodes, passengers etc.
+	-- by adding reset function to each and calling it here?
 	PlayerPosition = { x = 0, y = 0 }
-	Resources.fuel = DEFAULT_FUEL
-	Resources.oxygen = DEFAULT_OXYGEN
-	Resources.money = DEFAULT_MONEY
-	Resources.signals = DEFAULT_SIGNALS
+	Resources.fuel = constants.DEFAULT_RESOURCES.FUEL
+	Resources.oxygen = constants.DEFAULT_RESOURCES.OXYGEN
+	Resources.money = constants.DEFAULT_RESOURCES.MONEY
+	Resources.signals = constants.DEFAULT_RESOURCES.SIGNALS
 	PreviouslyVisitedCoords = {}
 	CurrentNode = nil
 	PreviousNode = nil
+	Moving = false
+	PlayerPassengers = {}
 end
 
--- config for choices at each planet, or spaceship or alien encounter etc.
-local NODE_OPTIONS = {
-	{
-		question = "You encounter a friendly alien. Do you want to trade? It will cost 15 money but give you 10 fuel.",
-		choices = {
-			{
-				text = "Yes",
-				effect = function()
-					if Resources.money < 15 then
-						print("Not enough money to trade with alien.")
-						return
-					end
-					Resources.money = Resources.money - 15
-					Resources.fuel = Resources.fuel + 10
-				end,
-			},
-			{
-				text = "No",
-				effect = function()
-					print("Ignored alien")
-				end,
-			},
-		},
-		image = "alien.png",
-	},
-	{
-		question = "You find a derelict spaceship. Do you want to scavenge it? It might have useful supplies.",
-		choices = {
-			{
-				text = "Yes",
-				effect = function()
-					local foundFuel = math.random(5, 15)
-					local foundOxygen = math.random(10, 30)
-					local foundMoney = math.random(20, 50)
-					Resources.fuel = Resources.fuel + foundFuel
-					Resources.oxygen = Resources.oxygen + foundOxygen
-					Resources.money = Resources.money + foundMoney
-					print(
-						"Scavenged spaceship and found "
-							.. foundFuel
-							.. " fuel, "
-							.. foundOxygen
-							.. " oxygen, and "
-							.. foundMoney
-							.. " money."
-					)
-				end,
-			},
-			{
-				text = "No",
-				effect = function()
-					print("Ignored derelict spaceship")
-				end,
-			},
-		},
-		image = "planet.png",
-	},
-	{
-		question = "You detect a weak signal nearby. Do you want to investigate? It might be a distress signal.",
-		choices = {
-			{
-				text = "Yes",
-				effect = function()
-					local success = math.random() < 0.7 -- 70% chance to find signal
-					if success then
-						Resources.signals = Resources.signals + 1
-						print("Successfully investigated signal and gained 1 signal.")
-					else
-						print("Investigated signal but found nothing.")
-					end
-				end,
-			},
-			{
-				text = "No",
-				effect = function()
-					print("Ignored weak signal")
-				end,
-			},
-		},
-		image = "planet.png",
-	},
-	-- planet
-	{
-		question = "You land on a small planet. Do you want to explore it? It might have resources.",
-		choices = {
-			{
-				text = "Yes",
-				effect = function()
-					local foundFuel = math.random(0, 10)
-					local foundOxygen = math.random(0, 20)
-					local foundMoney = math.random(10, 30)
-					Resources.fuel = Resources.fuel + foundFuel
-					Resources.oxygen = Resources.oxygen + foundOxygen
-					Resources.money = Resources.money + foundMoney
-					print(
-						"Explored planet and found "
-							.. foundFuel
-							.. " fuel, "
-							.. foundOxygen
-							.. " oxygen, and "
-							.. foundMoney
-							.. " money."
-					)
-				end,
-			},
-			{
-				text = "No",
-				effect = function()
-					print("Ignored planet")
-				end,
-			},
-		},
-		image = "planet.png",
-	},
-}
+function getRandomNodeType()
+	local probabilityTable = constants.Probabilities[types.GameStateType.Gameplay]
+	local totalWeight = 0
+	for _, option in ipairs(probabilityTable) do
+		totalWeight = totalWeight + option.weight
+	end
+	local rand = math.random() * totalWeight
+	local cumulativeWeight = 0
+	for _, option in ipairs(probabilityTable) do
+		cumulativeWeight = cumulativeWeight + option.weight
+		if rand <= cumulativeWeight then
+			return option.type
+		end
+	end
+	return constants.NODE_TYPES.EmptySpace -- fallback
+end
+
+function getRandomNode()
+	local nodeType = getRandomNodeType()
+	local options = constants.NODE_OPTIONS[nodeType]
+	if not options or #options == 0 then
+		return nil
+	end
+	return options[math.random(1, #options)]
+end
 
 function love.load()
 	love.graphics.setDefaultFilter("nearest")
@@ -174,7 +184,7 @@ function love.load()
 		love.graphics.clear(0.1, 0.1, 0.1, 1)
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.setFont(largeFont)
-		love.graphics.printf(GAME_TITLE, 0, 100, love.graphics.getWidth(), "center")
+		love.graphics.printf(constants.GAME_TITLE, 0, 100, love.graphics.getWidth(), "center")
 		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 75, love.graphics.getHeight() / 2 - 25, 150, 50)
 		love.graphics.setFont(smallFont)
 		love.graphics.printf(
@@ -227,18 +237,14 @@ function love.load()
 	GameState = types.GameStateType.Menu
 end
 
--- typing effect variables
-local charIndex = 0
-local typingSpeed = 0.01 -- Time in seconds between each character
-local timer = 0
-local displayedText = ""
-
--- moving planet variables
-local PreviousNode = nil
-local PrevPlanetPosition = { x = 0, y = 0 }
-local Moving = false
-local Direction = nil
-local NewPlanetPosition = { x = 0, y = 0 }
+function isPreviouslyVisited(x, y)
+	for _, coord in ipairs(PreviouslyVisitedCoords) do
+		if coord.x == x and coord.y == y then
+			return true
+		end
+	end
+	return false
+end
 
 function love.update(dt)
 	-- input handlng, game logic, calculations, updating positions etc.
@@ -247,7 +253,7 @@ function love.update(dt)
 		Menu.layoutmanager:update(dt)
 	elseif GameState == types.GameStateType.Gameplay then
 		if PreviousNode == nil then
-			CurrentNode = NODE_OPTIONS[math.random(1, #NODE_OPTIONS)]
+			CurrentNode = getRandomNode()
 			PreviousNode = CurrentNode
 		end
 		if Resources.fuel <= 0 then
@@ -266,7 +272,7 @@ function love.update(dt)
 				print("NavController or navigateTo function not defined")
 			end
 			return
-		elseif Resources.signals >= 5 then
+		elseif Resources.signals >= constants.SIGNAL_TOTAL_GOAL then
 			print("You have collected enough signals! You win!")
 			if Menu.navController and Menu.navController.navigateTo then
 				Menu.navController:navigateTo(types.GameStateType.Win)
@@ -275,17 +281,19 @@ function love.update(dt)
 			end
 			return
 		end
+		
+		local PLANET_SPEED = 3
 
 		if Moving then
 			-- update positions until new planet position reached and old one off screen
 			PrevPlanetPosition.x = PrevPlanetPosition.x
-				+ (Direction.x * love.graphics.getWidth() - PrevPlanetPosition.x) * dt
+				+ (Direction.x * love.graphics.getWidth() - PrevPlanetPosition.x) * dt * PLANET_SPEED
 			PrevPlanetPosition.y = PrevPlanetPosition.y
-				+ (Direction.y * love.graphics.getHeight() - PrevPlanetPosition.y) * dt
+				+ (Direction.y * love.graphics.getHeight() - PrevPlanetPosition.y) * dt * PLANET_SPEED
 			NewPlanetPosition.x = NewPlanetPosition.x
-				+ (Direction.x * love.graphics.getWidth() - NewPlanetPosition.x) * dt
+				+ (Direction.x * love.graphics.getWidth() - NewPlanetPosition.x) * dt * PLANET_SPEED
 			NewPlanetPosition.y = NewPlanetPosition.y
-				+ (Direction.y * love.graphics.getHeight() - NewPlanetPosition.y) * dt
+				+ (Direction.y * love.graphics.getHeight() - NewPlanetPosition.y) * dt * PLANET_SPEED
 
 			-- once new planet at 0 and 0, stop moving
 			if math.abs(NewPlanetPosition.x) < 50 and math.abs(NewPlanetPosition.y) < 50 then
@@ -297,29 +305,27 @@ function love.update(dt)
 			return
 		end
 
-		local visited = false
-		for _, coord in ipairs(PreviouslyVisitedCoords) do
-			if coord.x == PlayerPosition.x and coord.y == PlayerPosition.y then
-				visited = true
-				break
-			end
-		end
+		local visited = isPreviouslyVisited(PlayerPosition.x, PlayerPosition.y)
 
 		-- handle mouse click on choices
 		if not visited and CurrentNode and love.mouse.isDown(1) then
 			local mx, my = love.mouse.getPosition()
-			for i, choice in ipairs(CurrentNode.choices) do
-				if
-					mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
-					and mx <= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 200
-					and my >= love.graphics.getHeight() / 2 + PLANET_RADIUS + 60
-					and my <= love.graphics.getHeight() / 2 + PLANET_RADIUS + 90
-				then
-					-- apply choice effect
-					if choice.effect then
-						choice.effect()
+			if CurrentNode.type == constants.NODE_TYPES.Passenger then
+				PassengerNodeHandler:update(dt)
+			else 
+				for i, choice in ipairs(CurrentNode.choices) do
+					if
+						mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
+						and mx <= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 200
+						and my >= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60
+						and my <= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 90
+					then
+						-- apply choice effect
+						if choice.effect then
+							choice.effect()
+						end
+						markNodeAsVisited()
 					end
-					table.insert(PreviouslyVisitedCoords, { x = PlayerPosition.x, y = PlayerPosition.y })
 				end
 			end
 		end
@@ -360,19 +366,19 @@ function love.update(dt)
 
 		-- handle arrow key input
 		if love.keyboard.isDown("left") then
-			PlayerPosition.x = math.max(PlayerPosition.x - 1, -MAX_WIDTH + PLAYER_RADIUS)
+			PlayerPosition.x = math.max(PlayerPosition.x - 1, -constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = 1, y = 0 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("right") then
-			PlayerPosition.x = math.min(PlayerPosition.x + 1, MAX_WIDTH - PLAYER_RADIUS)
+			PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = -1, y = 0 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("up") then
-			PlayerPosition.y = math.max(PlayerPosition.y - 1, -MAX_WIDTH + PLAYER_RADIUS)
+			PlayerPosition.y = math.max(PlayerPosition.y - 1, -constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = 0, y = 1 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("down") then
-			PlayerPosition.y = math.min(PlayerPosition.y + 1, MAX_WIDTH - PLAYER_RADIUS)
+			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = 0, y = -1 })
 			Resources.fuel = Resources.fuel - 1
 		end
@@ -391,14 +397,145 @@ function handleNavigateToNewNode(direction)
 	-- animate planet sliding off screen and new one sliding in
 	Moving = true
 	Direction = direction
+	local offset = 3;
 	NewPlanetPosition =
-		{ x = -direction.x * love.graphics.getWidth() * 3, y = -direction.y * love.graphics.getHeight() * 3 }
+		{ x = -direction.x * love.graphics.getWidth() * offset, y = -direction.y * love.graphics.getHeight() * offset }
 
 	if CurrentNode ~= nil then
 		PreviousNode = CurrentNode
 	end
-	CurrentNode = NODE_OPTIONS[math.random(1, #NODE_OPTIONS)]
-	return { math.random(), math.random(), math.random(), 1 }
+	CurrentNode = getRandomNode()
+	if CurrentNode.type == constants.NODE_TYPES.Passenger then
+		-- todo: the handler should be added to the CurrentNode object itself
+		-- and implemented in the configuration file
+		PassengerNodeHandler:load()
+	end
+end
+
+function drawMinimap()
+	-- print minimap of the game area in the top-right corner
+	love.graphics.rectangle("line", love.graphics.getWidth() - 110, 10, 100, 100)
+	-- mark previously visited coords on minimap
+	for _, coord in ipairs(PreviouslyVisitedCoords) do
+		love.graphics.setColor(0, 1, 0, 1)
+		love.graphics.circle("fill", love.graphics.getWidth() - 60 + (coord.x*constants.PLAYER_RADIUS), 60 + (coord.y*constants.PLAYER_RADIUS), constants.PLAYER_RADIUS/2)
+		love.graphics.setColor(1, 1, 1, 1)
+	end
+	-- mark current player position on minimap
+	love.graphics.circle(
+		"fill",
+		love.graphics.getWidth() - 60 + PlayerPosition.x*constants.PLAYER_RADIUS,
+		60 + PlayerPosition.y*constants.PLAYER_RADIUS,
+		constants.PLAYER_RADIUS/2
+	)
+end
+
+function processDrawingNodeType(currentNode)
+	-- depending on node type, draw different things
+	if currentNode.characterImage ~= nil then 
+		local characterTalking = love.graphics.newImage(currentNode.characterImage)
+		love.graphics.draw(
+			characterTalking,
+			10,
+			love.graphics.getHeight() - 110,
+			0,
+			100 / characterTalking:getWidth(),
+			100 / characterTalking:getHeight()
+		)
+	end
+
+	-- most nodes should have some text
+	love.graphics.printf(
+		displayedText,
+		0,
+		love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 20,
+		love.graphics.getWidth(),
+		"center"
+	)
+
+	if CurrentNode.type == constants.NODE_TYPES.Passenger then
+		PassengerNodeHandler:draw()
+	else
+		for i, choice in ipairs(CurrentNode.choices) do
+			love.graphics.rectangle(
+				"line",
+				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
+				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60,
+				200,
+				30
+			)
+			love.graphics.printf(
+				choice.text,
+				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
+				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 65,
+				200,
+				"center"
+			)
+		end
+	end
+end
+
+function drawCurrentNode()
+	-- rotate planet over time and slower
+	local ROTATION_SPEED = 0.1
+	local time = love.timer.getTime() * ROTATION_SPEED
+
+	if Moving then
+		local prevImg = love.graphics.newImage(PreviousNode.image)
+		local newImg = love.graphics.newImage(CurrentNode.image)
+		love.graphics.draw(
+			prevImg,
+			love.graphics.getWidth() / 2 + PrevPlanetPosition.x,
+			love.graphics.getHeight() / 2 + PrevPlanetPosition.y,
+			time % (math.pi * 2),
+			(constants.PLANET_RADIUS * 2) / prevImg:getWidth(),
+			(constants.PLANET_RADIUS * 2) / prevImg:getHeight(),
+			prevImg:getWidth() / 2,
+			prevImg:getHeight() / 2
+		)
+		love.graphics.draw(
+			newImg,
+			love.graphics.getWidth() / 2 + NewPlanetPosition.x,
+			love.graphics.getHeight() / 2 + NewPlanetPosition.y,
+			time % (math.pi * 2),
+			(constants.PLANET_RADIUS * 2) / newImg:getWidth(),
+			(constants.PLANET_RADIUS * 2) / newImg:getHeight(),
+			newImg:getWidth() / 2,
+			newImg:getHeight() / 2
+		)
+	elseif CurrentNode then
+		local curImg = love.graphics.newImage(CurrentNode.image)
+		love.graphics.draw(
+			curImg,
+			love.graphics.getWidth() / 2,
+			love.graphics.getHeight() / 2,
+			time % (math.pi * 2),
+			(constants.PLANET_RADIUS * 2) / curImg:getWidth(),
+			(constants.PLANET_RADIUS * 2) / curImg:getHeight(),
+			curImg:getWidth() / 2,
+			curImg:getHeight() / 2
+		)
+	end
+
+	-- if at a new node, show the question and choices under the planet
+	local visited = isPreviouslyVisited(PlayerPosition.x, PlayerPosition.y)
+
+	if Moving or not CurrentNode then
+		return
+	end
+
+	if visited then
+		love.graphics.printf(
+			"You have already visited this location.",
+			0,
+			love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 20,
+			love.graphics.getWidth(),
+			"center"
+		)
+		return
+	end
+
+	processDrawingNodeType(CurrentNode)
 end
 
 function love.draw()
@@ -431,133 +568,62 @@ function love.draw()
 	elseif GameState == types.GameStateType.Gameplay then
 		love.graphics.clear(0, 0, 0, 1)
 		love.graphics.print("Press ESC to return to Menu", 10, 10)
-		-- draw a button in each corner with 'navigate' text and arrow pointing to that corner
-		love.graphics.print("<", 10, love.graphics.getHeight() / 2 - 10)
-		love.graphics.print(">", love.graphics.getWidth() - 30, love.graphics.getHeight() / 2 - 10)
-		love.graphics.print("^", love.graphics.getWidth() / 2 - 10, 10)
-		love.graphics.print("v", love.graphics.getWidth() / 2 - 10, love.graphics.getHeight() - 30)
-		-- draw rectangles around the arrows
-		love.graphics.rectangle("line", 10, love.graphics.getHeight() / 2 - 25, 20, 50)
-		love.graphics.rectangle("line", love.graphics.getWidth() - 30, love.graphics.getHeight() / 2 - 25, 20, 50)
-		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 25, 10, 50, 20)
-		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 25, love.graphics.getHeight() - 30, 50, 20)
 
-		-- print minimap of the game area in the top-right corner
-		love.graphics.rectangle("line", love.graphics.getWidth() - 110, 10, 100, 100)
-		-- mark previously visited coords on minimap
-		for _, coord in ipairs(PreviouslyVisitedCoords) do
-			love.graphics.setColor(0, 1, 0, 1)
-			love.graphics.circle("fill", love.graphics.getWidth() - 60 + coord.x, 60 + coord.y, PLAYER_RADIUS)
-			love.graphics.setColor(1, 1, 1, 1)
-		end
-		love.graphics.circle(
-			"fill",
-			love.graphics.getWidth() - 60 + PlayerPosition.x,
-			60 + PlayerPosition.y,
-			PLAYER_RADIUS
-		)
+		love.graphics.print("Use arrows to navigate", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() - 30)
 
-		-- rotate planet over time and slower
-		local ROTATION_SPEED = 0.1
-		local time = love.timer.getTime() * ROTATION_SPEED
-
-		if Moving then
-			local prevImg = love.graphics.newImage(PreviousNode.image)
-			local newImg = love.graphics.newImage(CurrentNode.image)
-			love.graphics.draw(
-				prevImg,
-				love.graphics.getWidth() / 2 + PrevPlanetPosition.x,
-				love.graphics.getHeight() / 2 + PrevPlanetPosition.y,
-				time % (math.pi * 2),
-				(PLANET_RADIUS * 2) / prevImg:getWidth(),
-				(PLANET_RADIUS * 2) / prevImg:getHeight(),
-				prevImg:getWidth() / 2,
-				prevImg:getHeight() / 2
-			)
-			love.graphics.draw(
-				newImg,
-				love.graphics.getWidth() / 2 + NewPlanetPosition.x,
-				love.graphics.getHeight() / 2 + NewPlanetPosition.y,
-				time % (math.pi * 2),
-				(PLANET_RADIUS * 2) / newImg:getWidth(),
-				(PLANET_RADIUS * 2) / newImg:getHeight(),
-				newImg:getWidth() / 2,
-				newImg:getHeight() / 2
-			)
-		elseif CurrentNode then
-			local curImg = love.graphics.newImage(CurrentNode.image)
-			love.graphics.draw(
-				curImg,
-				love.graphics.getWidth() / 2,
-				love.graphics.getHeight() / 2,
-				time % (math.pi * 2),
-				(PLANET_RADIUS * 2) / curImg:getWidth(),
-				(PLANET_RADIUS * 2) / curImg:getHeight(),
-				curImg:getWidth() / 2,
-				curImg:getHeight() / 2
-			)
-		end
+		drawMinimap()
 
 		-- print resources
 		love.graphics.print("Fuel: " .. Resources.fuel, 10, 40)
 		love.graphics.print("Oxygen: " .. Resources.oxygen, 10, 70)
 		love.graphics.print("Money: " .. Resources.money, 10, 100)
-		love.graphics.print("Signals: " .. Resources.signals, 10, 130)
-
-		-- if at a new node, show the question and choices under the planet
-		-- check if player position in previously visited coords
-		local visited = false
-		for _, coord in ipairs(PreviouslyVisitedCoords) do
-			if coord.x == PlayerPosition.x and coord.y == PlayerPosition.y then
-				visited = true
-				break
-			end
-		end
-
-		if not Moving and not visited and CurrentNode then
-			-- print alien in bottom left corner
-			local alien = love.graphics.newImage("alien.png")
-			love.graphics.draw(
-				alien,
-				10,
-				love.graphics.getHeight() - 110,
-				0,
-				100 / alien:getWidth(),
-				100 / alien:getHeight()
-			)
-
-			-- print question text
-			love.graphics.printf(
-				displayedText,
-				0,
-				love.graphics.getHeight() / 2 + PLANET_RADIUS + 20,
-				love.graphics.getWidth(),
-				"center"
-			)
-			for i, choice in ipairs(CurrentNode.choices) do
+		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 130)
+		
+		-- print current passengers at top middle of screen with names and images and empty slots
+		for i = 1, PlayerShip.MAX_PASSENGERS do
+			if PlayerPassengers[i] then
+				local passenger = PlayerPassengers[i]
+				local img = love.graphics.newImage(passenger.image)
 				love.graphics.rectangle(
 					"line",
-					love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
-					love.graphics.getHeight() / 2 + PLANET_RADIUS + 60,
-					200,
-					30
+					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 70,
+					10,
+					60,
+					60
+				)
+				love.graphics.draw(
+					img,
+					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 60 + 5,
+					15,
+					0,
+					50 / img:getWidth(),
+					50 / img:getHeight()
 				)
 				love.graphics.printf(
-					choice.text,
-					love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
-					love.graphics.getHeight() / 2 + PLANET_RADIUS + 65,
-					200,
+					passenger.name,
+					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 60,
+					70,
+					70,
+					"center"
+				)
+			else
+				love.graphics.rectangle(
+					"line",
+					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 70,
+					10,
+					60,
+					60
+				)
+				love.graphics.printf(
+					"Empty",
+					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 70,
+					70,
+					70,
 					"center"
 				)
 			end
-		else
-			love.graphics.printf(
-				"You've already been here",
-				0,
-				love.graphics.getHeight() / 2 + PLANET_RADIUS + 20,
-				love.graphics.getWidth(),
-				"center"
-			)
 		end
+
+		drawCurrentNode()
 	end
 end
