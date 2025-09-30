@@ -10,7 +10,7 @@ local Menu = {
 
 local PlayerPosition = { x = 0, y = 0 }
 local MAX_WIDTH = 50
-local PLAYER_RADIUS = 5;
+local PLAYER_RADIUS = 5
 
 local DEFAULT_FUEL = 30
 local DEFAULT_OXYGEN = 100
@@ -25,7 +25,7 @@ local Resources = {
 }
 local CurrentNode = nil
 
-local PLANET_RADIUS = 120;
+local PLANET_RADIUS = 120
 local PreviouslyVisitedCoords = {}
 
 function resetGame()
@@ -43,225 +43,119 @@ local NODE_OPTIONS = {
 	{
 		question = "You encounter a friendly alien. Do you want to trade? It will cost 15 money but give you 10 fuel.",
 		choices = {
-			{ text = "Yes", effect = function() 
-				if Resources.money < 15 then 
-					print("Not enough money to trade with alien.")
-					return 
-				end
-				Resources.money = Resources.money - 15
-				Resources.fuel = Resources.fuel + 10
-			end },
-			{ text = "No", effect = function() print("Ignored alien") end },
-		}
-	},
-	{
-		question = "You find an abandoned spaceship. Do you want to scavenge it? It might have useful resources.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local foundFuel = math.random(2, 8)
-				local foundOxygen = math.random(2, 8)
-				Resources.fuel = Resources.fuel + foundFuel
-				Resources.oxygen = Resources.oxygen + foundOxygen
-				print("Found " .. foundFuel .. " fuel and " .. foundOxygen .. " oxygen.")
-			end },
-			{ text = "No", effect = function() print("Left the spaceship alone") end },
-		}
-	},
-	{
-		question = "You encounter a space storm. Do you want to navigate through it? It will cost 20 fuel but save you time.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				Resources.fuel = Resources.fuel - 20
-				print("Navigated through the storm, but lost 20 fuel.")
-			end },
-			{ text = "No", effect = function() print("Avoided the storm, took longer route.") end },
-		}
-	},
-	{
-		question = "You find a derelict space station. Do you want to dock and explore? It might have resources but could be dangerous.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local risk = math.random()
-				if risk < 0.5 then
-					local foundOxygen = math.random(5, 12)
-					Resources.oxygen = Resources.oxygen + foundOxygen
-					print("Found " .. foundOxygen .. " oxygen in the station.")
-				else
-					local lostFuel = math.random(10, 20)
-					Resources.fuel = Resources.fuel - lostFuel
-					print("Encountered problems in the station, lost " .. lostFuel .. " fuel.")
-				end
-			end },
-			{ text = "No", effect = function() print("Decided not to risk exploring the station.") end },
-		}
-	},
-	{
-		question = "You come across a mysterious signal. Do you want to investigate? It could lead to valuable resources or danger.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local outcome = math.random()
-				if outcome < 0.3 then
-					local foundMoney = math.random(5, 15)
-					Resources.money = Resources.money + foundMoney
-					print("The signal led to a hidden cache! Found " .. foundMoney .. " money.")
-				elseif outcome < 0.8 then
-					local lostOxygen = math.random(10, 20)
-					Resources.oxygen = Resources.oxygen - lostOxygen
-					print("The signal was a trap! Lost " .. lostOxygen .. " oxygen.")
-				else
-					print("The signal was just static. Nothing happened.")
-				end
-			end },
-			{ text = "No", effect = function() print("Ignored the mysterious signal.") end },
-		}
-	},
-	{
-		question = "You detect a faint signal in the distance. Do you want to follow it? It might lead to something valuable.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local foundSignal = math.random() < 0.5
-				if foundSignal then
-					Resources.signals = Resources.signals + 1
-					print("You successfully traced the signal and collected it! Total signals: " .. Resources.signals)
-				else
-					print("The signal was too weak to trace. You gained nothing.")
-				end
-			end },
-			{ text = "No", effect = function() print("Decided not to follow the faint signal.") end },
-		}
-	},
-	{
-		question = "You find a floating crate. Do you want to open it? It might contain useful supplies.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local foundItem = math.random()
-				if foundItem < 0.4 then
-					local foundFuel = math.random(2, 6)
-					Resources.fuel = Resources.fuel + foundFuel
-					print("Found " .. foundFuel .. " fuel in the crate.")
-				elseif foundItem < 0.7 then
-					local foundOxygen = math.random(2, 6)
-					Resources.oxygen = Resources.oxygen + foundOxygen
-					print("Found " .. foundOxygen .. " oxygen in the crate.")
-				else
-					local lostMoney = math.random(10, 20)
-					Resources.money = math.max(Resources.money - lostMoney, 0)
-					print("The crate was a trap! Lost " .. lostMoney .. " money.")
-				end
-			end },
-			{ text = "No", effect = function() print("Left the crate unopened.") end },
-		}
-	},
-	{
-		question = "You encounter a derelict satellite. Do you want to salvage it? It might have useful components.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local foundFuel = math.random(2, 8)
-				local foundOxygen = math.random(2, 8)
-				Resources.fuel = Resources.fuel + foundFuel
-				Resources.oxygen = Resources.oxygen + foundOxygen
-				print("Salvaged the satellite and found " .. foundFuel .. " fuel and " .. foundOxygen .. " oxygen.")
-			end },
-			{ text = "No", effect = function() print("Decided not to salvage the satellite.") end },
-		}
-	},
-	{
-		question = "You come across a space anomaly. Do you want to investigate? It could be dangerous but might yield rewards.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local outcome = math.random()
-				if outcome < 0.2 then
-					local foundMoney = math.random(10, 20)
-					Resources.money = Resources.money + foundMoney
-					print("The anomaly contained valuable resources! Found " .. foundMoney .. " money.")
-				elseif outcome < 0.7 then
-					local lostFuel = math.random(15, 25)
-					Resources.fuel = Resources.fuel - lostFuel
-					print("The anomaly was hazardous! Lost " .. lostFuel .. " fuel.")
-				else
-					print("The anomaly was a false alarm. Nothing happened.")
-				end
-			end },
-			{ text = "No", effect = function() print("Chose to avoid the space anomaly.") end },
+			{
+				text = "Yes",
+				effect = function()
+					if Resources.money < 15 then
+						print("Not enough money to trade with alien.")
+						return
+					end
+					Resources.money = Resources.money - 15
+					Resources.fuel = Resources.fuel + 10
+				end,
+			},
+			{
+				text = "No",
+				effect = function()
+					print("Ignored alien")
+				end,
+			},
 		},
+		image = "alien.png",
 	},
 	{
-		question = "You detect a distress signal from another spaceship. Do you want to respond? It could be a trap or an opportunity to help.",
+		question = "You find a derelict spaceship. Do you want to scavenge it? It might have useful supplies.",
 		choices = {
-			{ text = "Yes", effect = function() 
-				local outcome = math.random()
-				if outcome < 0.3 then
-					local foundSignals = math.random(1, 2)
-					Resources.signals = Resources.signals + foundSignals
-					print("Rescued the crew and they rewarded you! Gained " .. foundSignals .. " signals.")
-				else
-					local lostOxygen = math.random(15, 25)
-					Resources.oxygen = Resources.oxygen - lostOxygen
-					print("It was a trap! Lost " .. lostOxygen .. " oxygen.")
-				end
-			end },
-			{ text = "No", effect = function() print("Ignored the distress signal.") end },
-		}
-	},
-	{
-		question = "You find a hidden asteroid field. Do you want to mine it? It could yield resources but is risky.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local risk = math.random()
-				if risk < 0.3 then
-					local foundMoney = math.random(10, 20)
+			{
+				text = "Yes",
+				effect = function()
+					local foundFuel = math.random(5, 15)
+					local foundOxygen = math.random(10, 30)
+					local foundMoney = math.random(20, 50)
+					Resources.fuel = Resources.fuel + foundFuel
+					Resources.oxygen = Resources.oxygen + foundOxygen
 					Resources.money = Resources.money + foundMoney
-					print("Successfully mined the asteroid field! Found " .. foundMoney .. " money.")
-				else
-					local lostFuel = math.random(15, 25)
-					Resources.fuel = Resources.fuel - lostFuel
-					print("Hit by debris while mining! Lost " .. lostFuel .. " fuel.")
-				end
-			end },
-			{ text = "No", effect = function() print("Decided not to mine the asteroid field.") end },
-		}
+					print(
+						"Scavenged spaceship and found "
+							.. foundFuel
+							.. " fuel, "
+							.. foundOxygen
+							.. " oxygen, and "
+							.. foundMoney
+							.. " money."
+					)
+				end,
+			},
+			{
+				text = "No",
+				effect = function()
+					print("Ignored derelict spaceship")
+				end,
+			},
+		},
+		image = "planet.png",
 	},
 	{
-		question = "You encounter a rogue space pirate. Do you want to engage in combat? It could yield loot but is dangerous.",
+		question = "You detect a weak signal nearby. Do you want to investigate? It might be a distress signal.",
 		choices = {
-			{ text = "Yes", effect = function() 
-				local outcome = math.random()
-				if outcome < 0.3 then
-					local foundMoney = math.random(15, 30)
+			{
+				text = "Yes",
+				effect = function()
+					local success = math.random() < 0.7 -- 70% chance to find signal
+					if success then
+						Resources.signals = Resources.signals + 1
+						print("Successfully investigated signal and gained 1 signal.")
+					else
+						print("Investigated signal but found nothing.")
+					end
+				end,
+			},
+			{
+				text = "No",
+				effect = function()
+					print("Ignored weak signal")
+				end,
+			},
+		},
+		image = "planet.png",
+	},
+	-- planet
+	{
+		question = "You land on a small planet. Do you want to explore it? It might have resources.",
+		choices = {
+			{
+				text = "Yes",
+				effect = function()
+					local foundFuel = math.random(0, 10)
+					local foundOxygen = math.random(0, 20)
+					local foundMoney = math.random(10, 30)
+					Resources.fuel = Resources.fuel + foundFuel
+					Resources.oxygen = Resources.oxygen + foundOxygen
 					Resources.money = Resources.money + foundMoney
-					print("Defeated the pirate and looted their ship! Found " .. foundMoney .. " money.")
-				else
-					local lostOxygen = math.random(20, 35)
-					Resources.oxygen = Resources.oxygen - lostOxygen
-					print("The pirate was too strong! Lost " .. lostOxygen .. " oxygen.")
-				end
-			end },
-			{ text = "No", effect = function() print("Avoided the space pirate.") end },
-		}
-	},
-	{
-		question = "You come across a derelict alien ship. Do you want to board it? It could have advanced technology but might be dangerous.",
-		choices = {
-			{ text = "Yes", effect = function() 
-				local outcome = math.random()
-				if outcome < 0.2 then
-					local foundSignals = math.random(1, 3)
-					Resources.signals = Resources.signals + foundSignals
-					print("Discovered advanced alien tech! Gained " .. foundSignals .. " signals.")
-				elseif outcome < 0.6 then
-					local lostFuel = math.random(15, 30)
-					Resources.fuel = Resources.fuel - lostFuel
-					print("The ship was booby-trapped! Lost " .. lostFuel .. " fuel.")
-				else
-					print("The ship was empty. Nothing happened.")
-				end
-			end },
-			{ text = "No", effect = function() print("Decided not to board the alien ship.") end },
-		}
+					print(
+						"Explored planet and found "
+							.. foundFuel
+							.. " fuel, "
+							.. foundOxygen
+							.. " oxygen, and "
+							.. foundMoney
+							.. " money."
+					)
+				end,
+			},
+			{
+				text = "No",
+				effect = function()
+					print("Ignored planet")
+				end,
+			},
+		},
+		image = "planet.png",
 	},
 }
 
 function love.load()
+	love.graphics.setDefaultFilter("nearest")
 	local navController = {
 		navigateTo = function(self, state)
 			GameState = state
@@ -271,7 +165,7 @@ function love.load()
 	-- loads once at start of game, setup game, and init/load assets etc.
 	-- create new menu
 	local layoutmanager = {}
-	
+
 	local largeFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 64)
 	local smallFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 24)
 
@@ -282,17 +176,47 @@ function love.load()
 		love.graphics.printf(GAME_TITLE, 0, 100, love.graphics.getWidth(), "center")
 		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 75, love.graphics.getHeight() / 2 - 25, 150, 50)
 		love.graphics.setFont(smallFont)
-		love.graphics.printf("Start Game", love.graphics.getWidth() / 2 - 75, love.graphics.getHeight() / 2 - 10, 150, "center")
+		love.graphics.printf(
+			"New Game",
+			love.graphics.getWidth() / 2 - 75,
+			love.graphics.getHeight() / 2 - 10,
+			150,
+			"center"
+		)
+		love.graphics.printf(
+			"Continue",
+			love.graphics.getWidth() / 2 - 75,
+			love.graphics.getHeight() / 2 + 100,
+			150,
+			"center"
+		)
 	end
 	function layoutmanager:update(dt)
 		if love.mouse.isDown(1) then
 			local mx, my = love.mouse.getPosition()
-			if mx >= love.graphics.getWidth() / 2 - 50 and mx <= love.graphics.getWidth() / 2 + 50 and
-			   my >= love.graphics.getHeight() / 2 - 25 and my <= love.graphics.getHeight() / 2 + 25 then
+			if
+				mx >= love.graphics.getWidth() / 2 - 50
+				and mx <= love.graphics.getWidth() / 2 + 50
+				and my >= love.graphics.getHeight() / 2 - 25
+				and my <= love.graphics.getHeight() / 2 + 25
+			then
 				if Menu.navController and Menu.navController.navigateTo then
 					resetGame()
 					Menu.navController:navigateTo(types.GameStateType.Gameplay)
-				else print("NavController or navigateTo function not defined")
+				else
+					print("NavController or navigateTo function not defined")
+				end
+			end
+			if
+				mx >= love.graphics.getWidth() / 2 - 50
+				and mx <= love.graphics.getWidth() / 2 + 50
+				and my >= love.graphics.getHeight() / 2 + 100
+				and my <= love.graphics.getHeight() / 2 + 150
+			then
+				if Menu.navController and Menu.navController.navigateTo then
+					Menu.navController:navigateTo(types.GameStateType.Gameplay)
+				else
+					print("NavController or navigateTo function not defined")
 				end
 			end
 		end
@@ -302,7 +226,18 @@ function love.load()
 	GameState = types.GameStateType.Menu
 end
 
+-- typing effect variables
+local charIndex = 0
+local typingSpeed = 0.01 -- Time in seconds between each character
+local timer = 0
+local displayedText = ""
 
+-- moving planet variables
+local PreviousNode = nil
+local PrevPlanetPosition = { x = 0, y = 0 }
+local Moving = false
+local Direction = nil
+local NewPlanetPosition = { x = 0, y = 0 }
 
 function love.update(dt)
 	-- input handlng, game logic, calculations, updating positions etc.
@@ -310,25 +245,53 @@ function love.update(dt)
 	if GameState == types.GameStateType.Menu then
 		Menu.layoutmanager:update(dt)
 	elseif GameState == types.GameStateType.Gameplay then
+		if PreviousNode == nil then
+			CurrentNode = NODE_OPTIONS[math.random(1, #NODE_OPTIONS)]
+			PreviousNode = CurrentNode
+		end
 		if Resources.fuel <= 0 then
 			print("Out of fuel! Game Over.")
 			if Menu.navController and Menu.navController.navigateTo then
 				Menu.navController:navigateTo(types.GameStateType.GameOver)
-			else print("NavController or navigateTo function not defined")
+			else
+				print("NavController or navigateTo function not defined")
 			end
 			return
 		elseif Resources.oxygen <= 0 then
 			print("Out of oxygen! Game Over.")
 			if Menu.navController and Menu.navController.navigateTo then
 				Menu.navController:navigateTo(types.GameStateType.GameOver)
-			else print("NavController or navigateTo function not defined")
+			else
+				print("NavController or navigateTo function not defined")
 			end
 			return
 		elseif Resources.signals >= 5 then
 			print("You have collected enough signals! You win!")
 			if Menu.navController and Menu.navController.navigateTo then
 				Menu.navController:navigateTo(types.GameStateType.Win)
-			else print("NavController or navigateTo function not defined")
+			else
+				print("NavController or navigateTo function not defined")
+			end
+			return
+		end
+
+		if Moving then
+			-- update positions until new planet position reached and old one off screen
+			PrevPlanetPosition.x = PrevPlanetPosition.x
+				+ (Direction.x * love.graphics.getWidth() - PrevPlanetPosition.x) * dt
+			PrevPlanetPosition.y = PrevPlanetPosition.y
+				+ (Direction.y * love.graphics.getHeight() - PrevPlanetPosition.y) * dt
+			NewPlanetPosition.x = NewPlanetPosition.x
+				+ (Direction.x * love.graphics.getWidth() - NewPlanetPosition.x) * dt
+			NewPlanetPosition.y = NewPlanetPosition.y
+				+ (Direction.y * love.graphics.getHeight() - NewPlanetPosition.y) * dt
+
+			-- once new planet at 0 and 0, stop moving
+			if math.abs(NewPlanetPosition.x) < 50 and math.abs(NewPlanetPosition.y) < 50 then
+				Moving = false
+				PrevPlanetPosition = { x = 0, y = 0 }
+				NewPlanetPosition = { x = 0, y = 0 }
+				Direction = nil
 			end
 			return
 		end
@@ -337,58 +300,95 @@ function love.update(dt)
 		if CurrentNode and love.mouse.isDown(1) then
 			local mx, my = love.mouse.getPosition()
 			for i, choice in ipairs(CurrentNode.choices) do
-				if mx >= love.graphics.getWidth() / 2 - 200 + (i-1)*250 and mx <= love.graphics.getWidth() / 2 - 200 + (i-1)*250 + 200 and
-				   my >= love.graphics.getHeight() / 2 + PLANET_RADIUS + 60 and my <= love.graphics.getHeight() / 2 + PLANET_RADIUS + 90 then 
+				if
+					mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
+					and mx <= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 200
+					and my >= love.graphics.getHeight() / 2 + PLANET_RADIUS + 60
+					and my <= love.graphics.getHeight() / 2 + PLANET_RADIUS + 90
+				then
 					-- apply choice effect
-					if choice.effect then choice.effect() end
-					CurrentNode = nil -- clear current node after making a choice
+					if choice.effect then
+						choice.effect()
+					end
+					table.insert(PreviouslyVisitedCoords, { x = PlayerPosition.x, y = PlayerPosition.y })
 				end
 			end
 		end
 
 		if love.keyboard.isDown("escape") then
 			if Menu.navController and Menu.navController.navigateTo then
-					Menu.navController:navigateTo(types.GameStateType.Menu)
-			else print("NavController or navigateTo function not defined")
+				Menu.navController:navigateTo(types.GameStateType.Menu)
+			else
+				print("NavController or navigateTo function not defined")
 			end
 		end
 
-		if CurrentNode then
+		local visited = false
+		for _, coord in ipairs(PreviouslyVisitedCoords) do
+			if coord.x == PlayerPosition.x and coord.y == PlayerPosition.y then
+				visited = true
+				break
+			end
+		end
+
+		if CurrentNode and not visited then
+			-- typewriter effect for question
+
+			timer = timer + dt
+
+			if charIndex < #CurrentNode.question and timer >= typingSpeed then
+				charIndex = charIndex + 1
+				displayedText = string.sub(CurrentNode.question, 1, charIndex)
+				timer = 0 -- Reset timer for the next character
+			end
+
 			-- if at a node, do not allow movement until choice made
 			return
+		else
+			charIndex = 0
+			displayedText = ""
 		end
 
 		-- handle arrow key input
 		if love.keyboard.isDown("left") then
-			PlayerPosition.x = math.max(PlayerPosition.x - 1, -MAX_WIDTH+PLAYER_RADIUS);
-			handleNavigateToNewNode()
+			PlayerPosition.x = math.max(PlayerPosition.x - 1, -MAX_WIDTH + PLAYER_RADIUS)
+			handleNavigateToNewNode({ x = -1, y = 0 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("right") then
-			PlayerPosition.x = math.min(PlayerPosition.x + 1, MAX_WIDTH-PLAYER_RADIUS);
-			handleNavigateToNewNode()
+			PlayerPosition.x = math.min(PlayerPosition.x + 1, MAX_WIDTH - PLAYER_RADIUS)
+			handleNavigateToNewNode({ x = 1, y = 0 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("up") then
-			PlayerPosition.y = math.max(PlayerPosition.y - 1, -MAX_WIDTH+PLAYER_RADIUS);
-			handleNavigateToNewNode()
+			PlayerPosition.y = math.max(PlayerPosition.y - 1, -MAX_WIDTH + PLAYER_RADIUS)
+			handleNavigateToNewNode({ x = 0, y = -1 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("down") then
-			PlayerPosition.y = math.min(PlayerPosition.y + 1, MAX_WIDTH-PLAYER_RADIUS);
-			handleNavigateToNewNode()
+			PlayerPosition.y = math.min(PlayerPosition.y + 1, MAX_WIDTH - PLAYER_RADIUS)
+			handleNavigateToNewNode({ x = 0, y = 1 })
 			Resources.fuel = Resources.fuel - 1
 		end
 	elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
 		if love.keyboard.isDown("escape") then
 			if Menu.navController and Menu.navController.navigateTo then
-					Menu.navController:navigateTo(types.GameStateType.Menu)
-			else print("NavController or navigateTo function not defined")
+				Menu.navController:navigateTo(types.GameStateType.Menu)
+			else
+				print("NavController or navigateTo function not defined")
 			end
 		end
 	end
 end
 
-function handleNavigateToNewNode()
+function handleNavigateToNewNode(direction)
+	-- animate planet sliding off screen and new one sliding in
+	Moving = true
+	Direction = direction
+	NewPlanetPosition =
+		{ x = -direction.x * love.graphics.getWidth() * 3, y = -direction.y * love.graphics.getHeight() * 3 }
+
+	if CurrentNode ~= nil then
+		PreviousNode = CurrentNode
+	end
 	CurrentNode = NODE_OPTIONS[math.random(1, #NODE_OPTIONS)]
-	table.insert(PreviouslyVisitedCoords, { x = PlayerPosition.x, y = PlayerPosition.y })
 	return { math.random(), math.random(), math.random(), 1 }
 end
 
@@ -399,12 +399,24 @@ function love.draw()
 		love.graphics.clear(0, 0.5, 0, 1)
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.printf("You Win!", 0, love.graphics.getHeight() / 2 - 50, love.graphics.getWidth(), "center")
-		love.graphics.printf("Press ESC to return to Menu", 0, love.graphics.getHeight() / 2 + 10, love.graphics.getWidth(), "center")
+		love.graphics.printf(
+			"Press ESC to return to Menu",
+			0,
+			love.graphics.getHeight() / 2 + 10,
+			love.graphics.getWidth(),
+			"center"
+		)
 	elseif GameState == types.GameStateType.GameOver then
 		love.graphics.clear(0.5, 0, 0, 1)
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.printf("Game Over!", 0, love.graphics.getHeight() / 2 - 50, love.graphics.getWidth(), "center")
-		love.graphics.printf("Press ESC to return to Menu", 0, love.graphics.getHeight() / 2 + 10, love.graphics.getWidth(), "center")
+		love.graphics.printf(
+			"Press ESC to return to Menu",
+			0,
+			love.graphics.getHeight() / 2 + 10,
+			love.graphics.getWidth(),
+			"center"
+		)
 	elseif GameState == types.GameStateType.Menu then
 		Menu.layoutmanager:draw()
 	elseif GameState == types.GameStateType.Gameplay then
@@ -420,7 +432,7 @@ function love.draw()
 		love.graphics.rectangle("line", love.graphics.getWidth() - 30, love.graphics.getHeight() / 2 - 25, 20, 50)
 		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 25, 10, 50, 20)
 		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 25, love.graphics.getHeight() - 30, 50, 20)
-	
+
 		-- print minimap of the game area in the top-right corner
 		love.graphics.rectangle("line", love.graphics.getWidth() - 110, 10, 100, 100)
 		-- mark previously visited coords on minimap
@@ -428,19 +440,54 @@ function love.draw()
 			love.graphics.setColor(0, 1, 0, 1)
 			love.graphics.circle("fill", love.graphics.getWidth() - 60 + coord.x, 60 + coord.y, PLAYER_RADIUS)
 			love.graphics.setColor(1, 1, 1, 1)
-		end	
-		love.graphics.circle("fill", love.graphics.getWidth() - 60 + PlayerPosition.x, 60 + PlayerPosition.y, PLAYER_RADIUS)
+		end
+		love.graphics.circle(
+			"fill",
+			love.graphics.getWidth() - 60 + PlayerPosition.x,
+			60 + PlayerPosition.y,
+			PLAYER_RADIUS
+		)
 
-		-- print planet in middle of screen
-		local planet = love.graphics.newImage("planet.png")
-		-- rotate planet over time
-		local time = love.timer.getTime()
-		love.graphics.draw(planet, love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, time % (math.pi * 2), (PLANET_RADIUS * 2) / planet:getWidth(), (PLANET_RADIUS * 2) / planet:getHeight(), planet:getWidth() / 2, planet:getHeight() / 2)
+		-- rotate planet over time and slower
+		local ROTATION_SPEED = 0.1
+		local time = love.timer.getTime() * ROTATION_SPEED
 
-		-- love.graphics.setColor(math.abs(PlayerPosition.x)/MAX_WIDTH, math.abs(PlayerPosition.y)/MAX_WIDTH, math.abs(PlayerPosition.x)/MAX_WIDTH, 1)
-		-- love.graphics.circle("fill", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, PLANET_RADIUS)
-		-- love.graphics.setColor(1, 1, 1, 1)
-		-- love.graphics.circle("line", love.graphics.getWidth() / 2, love.graphics.getHeight() / 2, PLANET_RADIUS)
+		if Moving then
+			local prevImg = love.graphics.newImage(PreviousNode.image)
+			local newImg = love.graphics.newImage(CurrentNode.image)
+			love.graphics.draw(
+				prevImg,
+				love.graphics.getWidth() / 2 + PrevPlanetPosition.x,
+				love.graphics.getHeight() / 2 + PrevPlanetPosition.y,
+				time % (math.pi * 2),
+				(PLANET_RADIUS * 2) / prevImg:getWidth(),
+				(PLANET_RADIUS * 2) / prevImg:getHeight(),
+				prevImg:getWidth() / 2,
+				prevImg:getHeight() / 2
+			)
+			love.graphics.draw(
+				newImg,
+				love.graphics.getWidth() / 2 + NewPlanetPosition.x,
+				love.graphics.getHeight() / 2 + NewPlanetPosition.y,
+				time % (math.pi * 2),
+				(PLANET_RADIUS * 2) / newImg:getWidth(),
+				(PLANET_RADIUS * 2) / newImg:getHeight(),
+				newImg:getWidth() / 2,
+				newImg:getHeight() / 2
+			)
+		elseif CurrentNode then
+			local curImg = love.graphics.newImage(CurrentNode.image)
+			love.graphics.draw(
+				curImg,
+				love.graphics.getWidth() / 2,
+				love.graphics.getHeight() / 2,
+				time % (math.pi * 2),
+				(PLANET_RADIUS * 2) / curImg:getWidth(),
+				(PLANET_RADIUS * 2) / curImg:getHeight(),
+				curImg:getWidth() / 2,
+				curImg:getHeight() / 2
+			)
+		end
 
 		-- print resources
 		love.graphics.print("Fuel: " .. Resources.fuel, 10, 40)
@@ -449,15 +496,59 @@ function love.draw()
 		love.graphics.print("Signals: " .. Resources.signals, 10, 130)
 
 		-- if at a new node, show the question and choices under the planet
-		if CurrentNode then
-			-- print robot in bottom left corner
-			local robot = love.graphics.newImage("robot.png")
-			love.graphics.draw(robot, 10, love.graphics.getHeight() - 110, 0, 100 / robot:getWidth(), 100 / robot:getHeight())
-			love.graphics.printf(CurrentNode.question, 0, love.graphics.getHeight() / 2 + PLANET_RADIUS + 20, love.graphics.getWidth(), "center")
-			for i, choice in ipairs(CurrentNode.choices) do
-				love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 200 + (i-1)*250, love.graphics.getHeight() / 2 + PLANET_RADIUS + 60, 200, 30)
-				love.graphics.printf(choice.text, love.graphics.getWidth() / 2 - 200 + (i-1)*250, love.graphics.getHeight() / 2 + PLANET_RADIUS + 65, 200, "center")
+		-- check if player position in previously visited coords
+		local visited = false
+		for _, coord in ipairs(PreviouslyVisitedCoords) do
+			if coord.x == PlayerPosition.x and coord.y == PlayerPosition.y then
+				visited = true
+				break
 			end
+		end
+
+		if not Moving and not visited and CurrentNode then
+			-- print alien in bottom left corner
+			local alien = love.graphics.newImage("alien.png")
+			love.graphics.draw(
+				alien,
+				10,
+				love.graphics.getHeight() - 110,
+				0,
+				100 / alien:getWidth(),
+				100 / alien:getHeight()
+			)
+
+			-- print question text
+			love.graphics.printf(
+				displayedText,
+				0,
+				love.graphics.getHeight() / 2 + PLANET_RADIUS + 20,
+				love.graphics.getWidth(),
+				"center"
+			)
+			for i, choice in ipairs(CurrentNode.choices) do
+				love.graphics.rectangle(
+					"line",
+					love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
+					love.graphics.getHeight() / 2 + PLANET_RADIUS + 60,
+					200,
+					30
+				)
+				love.graphics.printf(
+					choice.text,
+					love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
+					love.graphics.getHeight() / 2 + PLANET_RADIUS + 65,
+					200,
+					"center"
+				)
+			end
+		else
+			love.graphics.printf(
+				"You've already been here",
+				0,
+				love.graphics.getHeight() / 2 + PLANET_RADIUS + 20,
+				love.graphics.getWidth(),
+				"center"
+			)
 		end
 	end
 end
