@@ -352,19 +352,19 @@ function love.update(dt)
 		-- handle arrow key input
 		if love.keyboard.isDown("left") then
 			PlayerPosition.x = math.max(PlayerPosition.x - 1, -MAX_WIDTH + PLAYER_RADIUS)
-			handleNavigateToNewNode({ x = -1, y = 0 })
+			handleNavigateToNewNode({ x = 1, y = 0 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("right") then
 			PlayerPosition.x = math.min(PlayerPosition.x + 1, MAX_WIDTH - PLAYER_RADIUS)
-			handleNavigateToNewNode({ x = 1, y = 0 })
+			handleNavigateToNewNode({ x = -1, y = 0 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("up") then
 			PlayerPosition.y = math.max(PlayerPosition.y - 1, -MAX_WIDTH + PLAYER_RADIUS)
-			handleNavigateToNewNode({ x = 0, y = -1 })
+			handleNavigateToNewNode({ x = 0, y = 1 })
 			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("down") then
 			PlayerPosition.y = math.min(PlayerPosition.y + 1, MAX_WIDTH - PLAYER_RADIUS)
-			handleNavigateToNewNode({ x = 0, y = 1 })
+			handleNavigateToNewNode({ x = 0, y = -1 })
 			Resources.fuel = Resources.fuel - 1
 		end
 	elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
