@@ -43,7 +43,7 @@ M.Passengers = {
 			money = 1.5,
 			signals = 1.0,
 		},
-		image = "alien.png",
+		image = "alien2.png",
 	},
 	{
 		name = "Scientist",
@@ -53,7 +53,7 @@ M.Passengers = {
 			money = 1.0,
 			signals = 1.5,
 		},
-		image = "alien.png",
+		image = "alien2.png",
 	},
 	{
 		name = "Explorer",
@@ -92,7 +92,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "alien.png",
-            characterImage = "alien.png",
+      characterImage = "alien2.png",
 		},
 	},
 	[M.NODE_TYPES.Passenger] = {
@@ -111,7 +111,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "alien.png",
-            characterImage = "alien.png",
+      characterImage = "alien.png",
 		},
 	},
 	[M.NODE_TYPES.Anomaly] = {
@@ -138,8 +138,8 @@ M.NODE_OPTIONS = {
 					end,
 				},
 			},
-			image = "planet.png",
-            characterImage = "alien.png",
+			image = "dryPlanet.png",
+      characterImage = "alien2.png",
 		},
 	},
 	[M.NODE_TYPES.Combat] = {
@@ -168,7 +168,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "planet.png",
-            characterImage = "alien.png",
+      characterImage = "alien.png",
 		},
 	},
 	[M.NODE_TYPES.ResourceFind] = {
@@ -194,8 +194,8 @@ M.NODE_OPTIONS = {
 					end,
 				},
 			},
-			image = "planet.png",
-            characterImage = "planet.png",
+			image = "satellite.png",
+      characterImage = "alien2.png",
 		},
 	},
 	[M.NODE_TYPES.EmptySpace] = {
@@ -209,8 +209,8 @@ M.NODE_OPTIONS = {
 					end,
 				},
 			},
-			image = "planet.png",
-            characterImage = "planet.png",
+			image = "emptySpace.png",
+      characterImage = "alien2.png",
 		},
 	},
 	[M.NODE_TYPES.Story] = {
@@ -232,7 +232,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "planet.png",
-            characterImage = "planet.png",
+      characterImage = "alien.png",
 		},
 	},
 }
