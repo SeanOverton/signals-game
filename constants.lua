@@ -225,6 +225,6 @@ M.NODE_OPTIONS = {
 	},
 }
 
-M.PLANET_RADIUS = 120
+M.PLANET_RADIUS = 150
 
 return M
