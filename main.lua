@@ -48,6 +48,7 @@ end
 
 local PassengerNodeHandler = {
 	randomPassengers = {},
+	BUTTON_SIZE_PIXELS = 240,
 	load = function(self)
 		-- initiliases anything for the node when it is randomly selected
 		-- eg. random choices or shop stuff etc.
@@ -77,14 +78,21 @@ local PassengerNodeHandler = {
 				-- handle mouse click on passenger choice
 				if love.mouse.isDown(1) then
 					local mx, my = love.mouse.getPosition()
+					local x = love.graphics.getWidth() / 2 - self.BUTTON_SIZE_PIXELS + (i - 1) * 250
+					local y = love.graphics.getHeight() / 2 - 140
+					local w = self.BUTTON_SIZE_PIXELS
+					local h = self.BUTTON_SIZE_PIXELS
 					if
-						mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
-						and mx <= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 200
-						and my >= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60
-						and my <= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 160
+						mx >= x
+						and mx <= x + w
+						and my >= y
+						and my <= y + h
 					then
 						-- add passenger to Passenger list if space
 						if #PlayerPassengers >= PlayerShip.MAX_PASSENGERS then
+							-- update your first passenger to new one
+							table.remove(PlayerPassengers, 1)
+							table.insert(PlayerPassengers, passenger)
 							return
 						end
 						table.insert(PlayerPassengers, passenger)
@@ -100,24 +108,24 @@ local PassengerNodeHandler = {
 			local img = love.graphics.newImage(passenger.image)
 			love.graphics.rectangle(
 				"line",
-				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250+40,
-				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60,
-				120,
-				100
+				love.graphics.getWidth() / 2 - self.BUTTON_SIZE_PIXELS + (i - 1) * 250,
+				love.graphics.getHeight() / 2 - 140,
+				self.BUTTON_SIZE_PIXELS,
+				self.BUTTON_SIZE_PIXELS
 			)
 			love.graphics.draw(
 				img,
-				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 75,
-				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 70,
+				love.graphics.getWidth() / 2 - self.BUTTON_SIZE_PIXELS + (i - 1) * 250,
+				love.graphics.getHeight() / 2 - 140,
 				0,
-				50 / img:getWidth(),
-				50 / img:getHeight()
+				self.BUTTON_SIZE_PIXELS / img:getWidth(),
+				self.BUTTON_SIZE_PIXELS / img:getHeight()
 			)
 			love.graphics.printf(
 				passenger.name,
-				love.graphics.getWidth() / 2 - 200 + (i - 1) * 250,
-				love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 140,
-				200,
+				love.graphics.getWidth() / 2 - self.BUTTON_SIZE_PIXELS + (i - 1) * 250,
+				love.graphics.getHeight() / 2 + 110,
+				self.BUTTON_SIZE_PIXELS,
 				"center"
 			)
 		end
@@ -481,29 +489,33 @@ function drawCurrentNode()
 	local time = love.timer.getTime() * ROTATION_SPEED
 
 	if Moving then
-		local prevImg = love.graphics.newImage(PreviousNode.image)
-		local newImg = love.graphics.newImage(CurrentNode.image)
-		love.graphics.draw(
-			prevImg,
-			love.graphics.getWidth() / 2 + PrevPlanetPosition.x,
-			love.graphics.getHeight() / 2 + PrevPlanetPosition.y,
-			time % (math.pi * 2),
-			(constants.PLANET_RADIUS * 2) / prevImg:getWidth(),
-			(constants.PLANET_RADIUS * 2) / prevImg:getHeight(),
-			prevImg:getWidth() / 2,
-			prevImg:getHeight() / 2
-		)
-		love.graphics.draw(
-			newImg,
-			love.graphics.getWidth() / 2 + NewPlanetPosition.x,
-			love.graphics.getHeight() / 2 + NewPlanetPosition.y,
-			time % (math.pi * 2),
-			(constants.PLANET_RADIUS * 2) / newImg:getWidth(),
-			(constants.PLANET_RADIUS * 2) / newImg:getHeight(),
-			newImg:getWidth() / 2,
-			newImg:getHeight() / 2
-		)
-	elseif CurrentNode then
+		if PreviousNode.image then
+			local prevImg = love.graphics.newImage(PreviousNode.image)
+			love.graphics.draw(
+				prevImg,
+				love.graphics.getWidth() / 2 + PrevPlanetPosition.x,
+				love.graphics.getHeight() / 2 + PrevPlanetPosition.y,
+				time % (math.pi * 2),
+				(constants.PLANET_RADIUS * 2) / prevImg:getWidth(),
+				(constants.PLANET_RADIUS * 2) / prevImg:getHeight(),
+				prevImg:getWidth() / 2,
+				prevImg:getHeight() / 2
+			)
+		end
+		if CurrentNode.image then
+			local newImg = love.graphics.newImage(CurrentNode.image)
+			love.graphics.draw(
+				newImg,
+				love.graphics.getWidth() / 2 + NewPlanetPosition.x,
+				love.graphics.getHeight() / 2 + NewPlanetPosition.y,
+				time % (math.pi * 2),
+				(constants.PLANET_RADIUS * 2) / newImg:getWidth(),
+				(constants.PLANET_RADIUS * 2) / newImg:getHeight(),
+				newImg:getWidth() / 2,
+				newImg:getHeight() / 2
+			)
+		end
+	elseif CurrentNode and CurrentNode.image then
 		local curImg = love.graphics.newImage(CurrentNode.image)
 		love.graphics.draw(
 			curImg,

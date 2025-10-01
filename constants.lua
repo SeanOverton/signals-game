@@ -99,18 +99,6 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.Passenger,
 			question = "You encounter 2 aliens seeking passage. Which one will you let on board?",
-			choices = {
-				{
-                    value = M.Passengers[1],
-				},
-				{
-                    value = M.Passengers[2],
-				},
-				{
-                    value = M.Passengers[3],
-				},
-			},
-			image = "alien.png",
       characterImage = "alien.png",
 		},
 	},
