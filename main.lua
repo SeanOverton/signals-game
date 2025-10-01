@@ -538,6 +538,87 @@ function drawCurrentNode()
 	processDrawingNodeType(CurrentNode)
 end
 
+function drawCurrentPassengers()
+	local SIZE = 120
+	
+	-- print current passengers at top middle of screen with names and images and empty slots
+	for i = 1, PlayerShip.MAX_PASSENGERS do
+		if PlayerPassengers[i] then
+			local passenger = PlayerPassengers[i]
+			local img = love.graphics.newImage(passenger.image)
+			love.graphics.rectangle(
+				"line",
+				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
+				10,
+				SIZE,
+				SIZE
+			)
+			love.graphics.draw(
+				img,
+				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10) + 5,
+				15,
+				0,
+				(SIZE - 10) / img:getWidth(),
+				(SIZE - 10) / img:getHeight()
+			)
+			love.graphics.printf(
+				passenger.name,
+				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
+				10 + SIZE + 10,
+				SIZE + 10,
+				"center"
+			)
+		else
+			love.graphics.rectangle(
+				"line",
+				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
+				10,
+				SIZE,
+				SIZE
+			)
+			love.graphics.printf(
+				"Empty",
+				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
+				10 + SIZE + 10,
+				SIZE + 10,
+				"center"
+			)
+		end
+	end
+end
+
+function drawSpaceBg()
+	-- load bg and always spin it opposite to planet?
+	local BG_ROTATION_SPEED = -0.01
+	local bgTime = love.timer.getTime() * BG_ROTATION_SPEED
+	local bg
+	-- Safely attempt to load the background image
+	local success, imageOrError = pcall(love.graphics.newImage, "bg.png")
+	if success then
+		bg = imageOrError
+	else
+		-- fallback: draw a solid color background if image is missing
+		love.graphics.clear(0, 0, 0.1, 1)
+		return
+	end
+	-- Double the size of the image
+	local scaleX = (love.graphics.getWidth() * 1.3) / bg:getWidth()
+	local scaleY = (love.graphics.getWidth() * 1.3) / bg:getHeight()
+	-- Offset the rotation center for a cooler effect
+	local offsetX = bg:getWidth() / 2 + 5
+	local offsetY = bg:getHeight() / 2 + 5
+	love.graphics.draw(
+		bg,
+		love.graphics.getWidth() / 2,
+		love.graphics.getHeight() / 2,
+		bgTime % (math.pi * 2),
+		scaleX,
+		scaleY,
+		offsetX,
+		offsetY
+	)
+end
+
 function love.draw()
 	-- update UI, drawing elements etc. after update runs
 	-- runs after every love.update
@@ -567,6 +648,9 @@ function love.draw()
 		Menu.layoutmanager:draw()
 	elseif GameState == types.GameStateType.Gameplay then
 		love.graphics.clear(0, 0, 0, 1)
+		
+		drawSpaceBg()
+
 		love.graphics.print("Press ESC to return to Menu", 10, 10)
 
 		love.graphics.print("Use arrows to navigate", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() - 30)
@@ -578,52 +662,8 @@ function love.draw()
 		love.graphics.print("Oxygen: " .. Resources.oxygen, 10, 70)
 		love.graphics.print("Money: " .. Resources.money, 10, 100)
 		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 130)
-		
-		-- print current passengers at top middle of screen with names and images and empty slots
-		for i = 1, PlayerShip.MAX_PASSENGERS do
-			if PlayerPassengers[i] then
-				local passenger = PlayerPassengers[i]
-				local img = love.graphics.newImage(passenger.image)
-				love.graphics.rectangle(
-					"line",
-					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 70,
-					10,
-					60,
-					60
-				)
-				love.graphics.draw(
-					img,
-					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 60 + 5,
-					15,
-					0,
-					50 / img:getWidth(),
-					50 / img:getHeight()
-				)
-				love.graphics.printf(
-					passenger.name,
-					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 60,
-					70,
-					70,
-					"center"
-				)
-			else
-				love.graphics.rectangle(
-					"line",
-					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 70,
-					10,
-					60,
-					60
-				)
-				love.graphics.printf(
-					"Empty",
-					love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * 60) / 2 + (i - 1) * 70,
-					70,
-					70,
-					"center"
-				)
-			end
-		end
 
+		drawCurrentPassengers()
 		drawCurrentNode()
 	end
 end
