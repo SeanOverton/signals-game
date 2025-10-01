@@ -92,8 +92,6 @@ local PassengerNodeHandler = {
 						if #PlayerPassengers >= PlayerShip.MAX_PASSENGERS then
 							-- update your first passenger to new one
 							table.remove(PlayerPassengers, 1)
-							table.insert(PlayerPassengers, passenger)
-							return
 						end
 						table.insert(PlayerPassengers, passenger)
 						markNodeAsVisited()
@@ -670,10 +668,16 @@ function love.draw()
 		drawMinimap()
 
 		-- print resources
+		-- set bg as dark block colour rectangle behind text for readability
+		love.graphics.setColor(0, 0, 0, 0.9)
+		love.graphics.rectangle("fill", 0, 30, 200, 180)
+		love.graphics.setColor(1, 1, 1, 1)
+		love.graphics.setFont(love.graphics.newFont('chonky-bits-font/ChonkyBitsFontRegular.otf', 40))
 		love.graphics.print("Fuel: " .. Resources.fuel, 10, 40)
-		love.graphics.print("Oxygen: " .. Resources.oxygen, 10, 70)
-		love.graphics.print("Money: " .. Resources.money, 10, 100)
-		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 130)
+		love.graphics.print("Oxygen: " .. Resources.oxygen, 10, 80)
+		love.graphics.print("Money: " .. Resources.money, 10, 120)
+		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 160)
+		love.graphics.setFont(love.graphics.newFont('chonky-bits-font/ChonkyBitsFontRegular.otf', 26))
 
 		drawCurrentPassengers()
 		drawCurrentNode()
