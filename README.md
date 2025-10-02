@@ -13,11 +13,13 @@ https://github.com/mtanksl/LOVELi
 - Organise code better, particularly around nodes. Make this a more generic object. Done
 - passengers also, done
 - Finish: passengers and empty nodes first, with UI, done
-- More art assets for more nodes, generally update UI
-- Main menu
+- Main menu, done
+- More art assets for more nodes, generally update UI. more passegers
 
 - Then:
+- refactor nodes to be more extensible, use object
 - Implement story
+- refactor ship
 - Implement shop, and other node types
 - Implement ship upgrades (more effects on the situations)
 - Implement collections, runs etc.
