@@ -21,6 +21,7 @@ M.NODE_TYPES = {
 	EmptySpace = "emptySpace",
 	Story = "story",
 }
+
 M.Probabilities = {
 	[types.GameStateType.Gameplay] = {
 		{ type = M.NODE_TYPES.Passenger, weight = 10 },
@@ -71,7 +72,7 @@ M.Passengers = {
 M.NODE_OPTIONS = {
 	[M.NODE_TYPES.Shop] = {
 		{
-			question = "You encounter a space trader. Do you want to buy fuel for 10 money?",
+			question = "You encounter a space trader. Do you want to buy fuel (+20) for 10 money (-10)?",
 			choices = {
 				{
 					text = "Yes",
@@ -98,7 +99,7 @@ M.NODE_OPTIONS = {
 	[M.NODE_TYPES.Passenger] = {
 		{
 			type = M.NODE_TYPES.Passenger,
-			question = "You encounter 2 aliens seeking passage. Which one will you let on board?",
+			question = "You encounter 2 aliens seeking passage. Let one on board?",
       characterImage = "alien.png",
 		},
 	},

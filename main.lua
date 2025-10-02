@@ -372,21 +372,37 @@ function love.update(dt)
 
 		-- handle arrow key input
 		if love.keyboard.isDown("left") then
+			-- don't let players go beyond x=0 (starting line)
+			if PlayerPosition.x <= -constants.MAX_WIDTH/2 then
+				return
+			end
+
 			PlayerPosition.x = math.max(PlayerPosition.x - 1, -constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = 1, y = 0 })
-			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("right") then
+			-- don't let players go beyond x=0 (starting line)
+			if PlayerPosition.x >= constants.MAX_WIDTH/2 then
+				return
+			end
+
 			PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = -1, y = 0 })
-			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("up") then
+			-- don't let players go above y=0 (starting line)
+			if PlayerPosition.y <= -constants.MAX_WIDTH/2 then
+				return
+			end
+
 			PlayerPosition.y = math.max(PlayerPosition.y - 1, -constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = 0, y = 1 })
-			Resources.fuel = Resources.fuel - 1
 		elseif love.keyboard.isDown("down") then
+			-- don't let players go below y=0 (starting line)
+			if PlayerPosition.y >= constants.MAX_WIDTH/2 then
+				return
+			end
+			
 			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH/2)
 			handleNavigateToNewNode({ x = 0, y = -1 })
-			Resources.fuel = Resources.fuel - 1
 		end
 	elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
 		if love.keyboard.isDown("escape") then
@@ -400,6 +416,8 @@ function love.update(dt)
 end
 
 function handleNavigateToNewNode(direction)
+	Resources.fuel = Resources.fuel - 1
+
 	-- animate planet sliding off screen and new one sliding in
 	Moving = true
 	Direction = direction
@@ -437,18 +455,32 @@ function drawMinimap()
 end
 
 function processDrawingNodeType(currentNode)
+	-- draw a reactangle box behind text for readability
+	love.graphics.setColor(0, 0, 0, 0.7)
+	love.graphics.rectangle(
+		"fill",
+		0,
+		love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 10,
+		love.graphics.getWidth(),
+		constants.PLANET_RADIUS + 100
+	)
+	love.graphics.setColor(1, 1, 1, 1)
+
 	-- depending on node type, draw different things
-	if currentNode.characterImage ~= nil then 
+	if currentNode.characterImage ~= nil then
+		local CHARACTER_TALKING_SIZE_PIXELS = 200 
 		local characterTalking = love.graphics.newImage(currentNode.characterImage)
 		love.graphics.draw(
 			characterTalking,
 			10,
-			love.graphics.getHeight() - 110,
+			love.graphics.getHeight() - (CHARACTER_TALKING_SIZE_PIXELS+10),
 			0,
-			100 / characterTalking:getWidth(),
-			100 / characterTalking:getHeight()
+			CHARACTER_TALKING_SIZE_PIXELS / characterTalking:getWidth(),
+			CHARACTER_TALKING_SIZE_PIXELS / characterTalking:getHeight()
 		)
 	end
+
+
 
 	-- most nodes should have some text
 	love.graphics.printf(
