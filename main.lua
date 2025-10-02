@@ -205,7 +205,9 @@ function love.load()
 
 	-- loads once at start of game, setup game, and init/load assets etc.
 	-- create new menu
-	local layoutmanager = {}
+	local layoutmanager = {
+		hover = nil,
+	}
 
 	local largeFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 96)
 	local smallFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 40)
@@ -220,12 +222,19 @@ function love.load()
 		local buttonWidth = 200
 		love.graphics.rectangle(
 			"line",
-			love.graphics.getWidth() / 2 - 75,
+			love.graphics.getWidth() / 2 - (self.hover == "new_game" and 100 or 75),
 			love.graphics.getHeight() / 2 - 25,
-			buttonWidth,
-			50
+			self.hover == "new_game" and buttonWidth + 50 or buttonWidth,
+			self.hover == "new_game" and 70 or 50
 		)
+
 		love.graphics.setFont(smallFont)
+
+		if self.hover == "new_game" then
+			love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 50))
+		else
+			love.graphics.setFont(smallFont)
+		end
 		love.graphics.printf(
 			"New Game",
 			love.graphics.getWidth() / 2 - 75,
@@ -233,6 +242,12 @@ function love.load()
 			buttonWidth,
 			"center"
 		)
+
+		if self.hover == "continue" then
+			love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 50))
+		else
+			love.graphics.setFont(smallFont)
+		end
 		love.graphics.printf(
 			"Continue",
 			love.graphics.getWidth() / 2 - 75,
@@ -240,35 +255,36 @@ function love.load()
 			buttonWidth,
 			"center"
 		)
+
+		love.graphics.setFont(smallFont)
 	end
 	function layoutmanager:update(dt)
-		if love.mouse.isDown(1) then
-			local mx, my = love.mouse.getPosition()
-			if
-				mx >= love.graphics.getWidth() / 2 - 50
-				and mx <= love.graphics.getWidth() / 2 + 50
-				and my >= love.graphics.getHeight() / 2 - 25
-				and my <= love.graphics.getHeight() / 2 + 25
-			then
-				if Menu.navController and Menu.navController.navigateTo then
-					resetGame()
-					Menu.navController:navigateTo(types.GameStateType.Gameplay)
-				else
-					print("NavController or navigateTo function not defined")
-				end
+		local mx, my = love.mouse.getPosition()
+		if
+			mx >= love.graphics.getWidth() / 2 - 50
+			and mx <= love.graphics.getWidth() / 2 + 50
+			and my >= love.graphics.getHeight() / 2 - 25
+			and my <= love.graphics.getHeight() / 2 + 25
+		then
+			if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
+				resetGame()
+				Menu.navController:navigateTo(types.GameStateType.Gameplay)
+			else
+				self.hover = "new_game"
 			end
-			if
-				mx >= love.graphics.getWidth() / 2 - 50
-				and mx <= love.graphics.getWidth() / 2 + 50
-				and my >= love.graphics.getHeight() / 2 + 100
-				and my <= love.graphics.getHeight() / 2 + 150
-			then
-				if Menu.navController and Menu.navController.navigateTo then
-					Menu.navController:navigateTo(types.GameStateType.Gameplay)
-				else
-					print("NavController or navigateTo function not defined")
-				end
+		elseif
+			mx >= love.graphics.getWidth() / 2 - 50
+			and mx <= love.graphics.getWidth() / 2 + 50
+			and my >= love.graphics.getHeight() / 2 + 100
+			and my <= love.graphics.getHeight() / 2 + 150
+		then
+			if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.Gameplay)
+			else
+				self.hover = "continue"
 			end
+		else
+			self.hover = nil
 		end
 	end
 	Menu.layoutmanager = layoutmanager
