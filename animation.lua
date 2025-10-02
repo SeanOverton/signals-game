@@ -8,7 +8,7 @@ function Animation:new(type, text, x, y, color)
 		x = x,
 		y = y,
 		alpha = 1,
-		lifetime = 1.0,
+		lifetime = 0.5,
 		timer = 0,
 		color = color or { 1, 1, 1 },
 	}, Animation)

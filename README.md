@@ -10,9 +10,12 @@ https://github.com/mtanksl/LOVELi
 
 ## Todo
 
-- Organise code better, particularly around nodes. Make this a more generic object
+- Organise code better, particularly around nodes. Make this a more generic object. Done
+- passengers also, done
+- Finish: passengers and empty nodes first, with UI, done
 - More art assets for more nodes, generally update UI
-- Finish: passengers and empty nodes first, with UI
+- Main menu
+
 - Then:
 - Implement story
 - Implement shop, and other node types

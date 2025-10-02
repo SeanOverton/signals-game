@@ -207,28 +207,37 @@ function love.load()
 	-- create new menu
 	local layoutmanager = {}
 
-	local largeFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 64)
-	local smallFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 24)
+	local largeFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 96)
+	local smallFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 40)
 
 	function layoutmanager:draw()
 		love.graphics.clear(0.1, 0.1, 0.1, 1)
+		drawSpaceBg()
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.setFont(largeFont)
 		love.graphics.printf(constants.GAME_TITLE, 0, 100, love.graphics.getWidth(), "center")
-		love.graphics.rectangle("line", love.graphics.getWidth() / 2 - 75, love.graphics.getHeight() / 2 - 25, 150, 50)
+
+		local buttonWidth = 200
+		love.graphics.rectangle(
+			"line",
+			love.graphics.getWidth() / 2 - 75,
+			love.graphics.getHeight() / 2 - 25,
+			buttonWidth,
+			50
+		)
 		love.graphics.setFont(smallFont)
 		love.graphics.printf(
 			"New Game",
 			love.graphics.getWidth() / 2 - 75,
 			love.graphics.getHeight() / 2 - 10,
-			150,
+			buttonWidth,
 			"center"
 		)
 		love.graphics.printf(
 			"Continue",
 			love.graphics.getWidth() / 2 - 75,
 			love.graphics.getHeight() / 2 + 100,
-			150,
+			buttonWidth,
 			"center"
 		)
 	end
