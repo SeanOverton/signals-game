@@ -1,5 +1,9 @@
 local types = require("./types/main")
 local constants = require("./constants")
+local eventManager = require("./eventManager")
+local passengers = require("./passengers")
+local animationSystem = require("./animationSystem")
+local resourceAnimations = require("./animation")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -8,7 +12,7 @@ local SETTINGS = {
 
 -- placeholder for player ship, currently no stats or upgrades
 local PlayerShip = {
-	MAX_PASSENGERS = 3
+	MAX_PASSENGERS = 3,
 }
 
 -- global vars/state shared between constants.luan for config
@@ -18,6 +22,7 @@ Resources = {
 	money = constants.DEFAULT_RESOURCES.MONEY,
 	signals = constants.DEFAULT_RESOURCES.SIGNALS,
 }
+
 PlayerPassengers = {}
 -- more game state vars
 local PlayerPosition = { x = 0, y = 0 }
@@ -53,8 +58,8 @@ local PassengerNodeHandler = {
 		-- initiliases anything for the node when it is randomly selected
 		-- eg. random choices or shop stuff etc.
 		local randomPassengers = {}
-		while #randomPassengers < math.min(#constants.Passengers, 2) do
-			local candidate = constants.Passengers[math.random(1, #constants.Passengers)]
+		while #randomPassengers < math.min(#passengers, 2) do
+			local candidate = passengers[math.random(1, #passengers)]
 			local alreadyChosen = false
 			for _, p in ipairs(randomPassengers) do
 				if p.name == candidate.name then
@@ -82,18 +87,19 @@ local PassengerNodeHandler = {
 					local y = love.graphics.getHeight() / 2 - 140
 					local w = self.BUTTON_SIZE_PIXELS
 					local h = self.BUTTON_SIZE_PIXELS
-					if
-						mx >= x
-						and mx <= x + w
-						and my >= y
-						and my <= y + h
-					then
+					if mx >= x and mx <= x + w and my >= y and my <= y + h then
 						-- add passenger to Passenger list if space
 						if #PlayerPassengers >= PlayerShip.MAX_PASSENGERS then
 							-- update your first passenger to new one
-							table.remove(PlayerPassengers, 1)
+							local removedPassenger = table.remove(PlayerPassengers, 1)
+							if removedPassenger and removedPassenger.deregister then
+								removedPassenger:deregister(eventManager)
+							end
 						end
 						table.insert(PlayerPassengers, passenger)
+						if passenger.register then
+							passenger:register(eventManager)
+						end
 						markNodeAsVisited()
 					end
 				end
@@ -129,6 +135,22 @@ local PassengerNodeHandler = {
 		end
 	end,
 }
+
+function updateResource(resourceType, amount)
+	if Resources[resourceType] then
+		Resources[resourceType] = Resources[resourceType] + amount
+		if Resources[resourceType] < 0 then
+			Resources[resourceType] = 0
+		end
+		eventManager.emit(resourceType .. "Updated", { amount = Resources[resourceType], change = amount })
+	else
+		print("Invalid resource type: " .. resourceType)
+	end
+end
+
+function registerResourceListener(resourceType, callback)
+	eventManager.on(resourceType .. "Updated", callback)
+end
 
 function resetGame()
 	-- todo should force garbage collection of old nodes, passengers etc.
@@ -178,6 +200,8 @@ function love.load()
 			GameState = state
 		end,
 	}
+
+	resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
 
 	-- loads once at start of game, setup game, and init/load assets etc.
 	-- create new menu
@@ -287,7 +311,9 @@ function love.update(dt)
 			end
 			return
 		end
-		
+
+		animationSystem:update(dt)
+
 		local PLANET_SPEED = 3
 
 		if Moving then
@@ -318,7 +344,7 @@ function love.update(dt)
 			local mx, my = love.mouse.getPosition()
 			if CurrentNode.type == constants.NODE_TYPES.Passenger then
 				PassengerNodeHandler:update(dt)
-			else 
+			else
 				for i, choice in ipairs(CurrentNode.choices) do
 					if
 						mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
@@ -328,7 +354,7 @@ function love.update(dt)
 					then
 						-- apply choice effect
 						if choice.effect then
-							choice.effect()
+							choice.effect(updateResource)
 						end
 						markNodeAsVisited()
 					end
@@ -373,35 +399,35 @@ function love.update(dt)
 		-- handle arrow key input
 		if love.keyboard.isDown("left") then
 			-- don't let players go beyond x=0 (starting line)
-			if PlayerPosition.x <= -constants.MAX_WIDTH/2 then
+			if PlayerPosition.x <= -constants.MAX_WIDTH / 2 then
 				return
 			end
 
-			PlayerPosition.x = math.max(PlayerPosition.x - 1, -constants.MAX_WIDTH/2)
+			PlayerPosition.x = math.max(PlayerPosition.x - 1, -constants.MAX_WIDTH / 2)
 			handleNavigateToNewNode({ x = 1, y = 0 })
 		elseif love.keyboard.isDown("right") then
 			-- don't let players go beyond x=0 (starting line)
-			if PlayerPosition.x >= constants.MAX_WIDTH/2 then
+			if PlayerPosition.x >= constants.MAX_WIDTH / 2 then
 				return
 			end
 
-			PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH/2)
+			PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH / 2)
 			handleNavigateToNewNode({ x = -1, y = 0 })
 		elseif love.keyboard.isDown("up") then
 			-- don't let players go above y=0 (starting line)
-			if PlayerPosition.y <= -constants.MAX_WIDTH/2 then
+			if PlayerPosition.y <= -constants.MAX_WIDTH / 2 then
 				return
 			end
 
-			PlayerPosition.y = math.max(PlayerPosition.y - 1, -constants.MAX_WIDTH/2)
+			PlayerPosition.y = math.max(PlayerPosition.y - 1, -constants.MAX_WIDTH / 2)
 			handleNavigateToNewNode({ x = 0, y = 1 })
 		elseif love.keyboard.isDown("down") then
 			-- don't let players go below y=0 (starting line)
-			if PlayerPosition.y >= constants.MAX_WIDTH/2 then
+			if PlayerPosition.y >= constants.MAX_WIDTH / 2 then
 				return
 			end
-			
-			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH/2)
+
+			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH / 2)
 			handleNavigateToNewNode({ x = 0, y = -1 })
 		end
 	elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
@@ -416,12 +442,12 @@ function love.update(dt)
 end
 
 function handleNavigateToNewNode(direction)
-	Resources.fuel = Resources.fuel - 1
+	updateResource("fuel", -constants.FUEL_CONSUMPTION_PER_MOVE)
 
 	-- animate planet sliding off screen and new one sliding in
 	Moving = true
 	Direction = direction
-	local offset = 3;
+	local offset = 3
 	NewPlanetPosition =
 		{ x = -direction.x * love.graphics.getWidth() * offset, y = -direction.y * love.graphics.getHeight() * offset }
 
@@ -442,15 +468,20 @@ function drawMinimap()
 	-- mark previously visited coords on minimap
 	for _, coord in ipairs(PreviouslyVisitedCoords) do
 		love.graphics.setColor(0, 1, 0, 1)
-		love.graphics.circle("fill", love.graphics.getWidth() - 60 + (coord.x*constants.PLAYER_RADIUS), 60 + (coord.y*constants.PLAYER_RADIUS), constants.PLAYER_RADIUS/2)
+		love.graphics.circle(
+			"fill",
+			love.graphics.getWidth() - 60 + (coord.x * constants.PLAYER_RADIUS),
+			60 + (coord.y * constants.PLAYER_RADIUS),
+			constants.PLAYER_RADIUS / 2
+		)
 		love.graphics.setColor(1, 1, 1, 1)
 	end
 	-- mark current player position on minimap
 	love.graphics.circle(
 		"fill",
-		love.graphics.getWidth() - 60 + PlayerPosition.x*constants.PLAYER_RADIUS,
-		60 + PlayerPosition.y*constants.PLAYER_RADIUS,
-		constants.PLAYER_RADIUS/2
+		love.graphics.getWidth() - 60 + PlayerPosition.x * constants.PLAYER_RADIUS,
+		60 + PlayerPosition.y * constants.PLAYER_RADIUS,
+		constants.PLAYER_RADIUS / 2
 	)
 end
 
@@ -468,19 +499,17 @@ function processDrawingNodeType(currentNode)
 
 	-- depending on node type, draw different things
 	if currentNode.characterImage ~= nil then
-		local CHARACTER_TALKING_SIZE_PIXELS = 200 
+		local CHARACTER_TALKING_SIZE_PIXELS = 200
 		local characterTalking = love.graphics.newImage(currentNode.characterImage)
 		love.graphics.draw(
 			characterTalking,
 			10,
-			love.graphics.getHeight() - (CHARACTER_TALKING_SIZE_PIXELS+10),
+			love.graphics.getHeight() - (CHARACTER_TALKING_SIZE_PIXELS + 10),
 			0,
 			CHARACTER_TALKING_SIZE_PIXELS / characterTalking:getWidth(),
 			CHARACTER_TALKING_SIZE_PIXELS / characterTalking:getHeight()
 		)
 	end
-
-
 
 	-- most nodes should have some text
 	love.graphics.printf(
@@ -582,7 +611,7 @@ end
 
 function drawCurrentPassengers()
 	local SIZE = 120
-	
+
 	-- print current passengers at top middle of screen with names and images and empty slots
 	for i = 1, PlayerShip.MAX_PASSENGERS do
 		if PlayerPassengers[i] then
@@ -690,11 +719,10 @@ function love.draw()
 		Menu.layoutmanager:draw()
 	elseif GameState == types.GameStateType.Gameplay then
 		love.graphics.clear(0, 0, 0, 1)
-		
+
 		drawSpaceBg()
 
 		love.graphics.print("Press ESC to return to Menu", 10, 10)
-
 		love.graphics.print("Use arrows to navigate", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() - 30)
 
 		drawMinimap()
@@ -704,12 +732,14 @@ function love.draw()
 		love.graphics.setColor(0, 0, 0, 0.9)
 		love.graphics.rectangle("fill", 0, 30, 200, 180)
 		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.setFont(love.graphics.newFont('chonky-bits-font/ChonkyBitsFontRegular.otf', 40))
+		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 40))
 		love.graphics.print("Fuel: " .. Resources.fuel, 10, 40)
 		love.graphics.print("Oxygen: " .. Resources.oxygen, 10, 80)
 		love.graphics.print("Money: " .. Resources.money, 10, 120)
 		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 160)
-		love.graphics.setFont(love.graphics.newFont('chonky-bits-font/ChonkyBitsFontRegular.otf', 26))
+		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
+
+		animationSystem:draw()
 
 		drawCurrentPassengers()
 		drawCurrentNode()
