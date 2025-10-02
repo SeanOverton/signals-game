@@ -4,6 +4,7 @@ local eventManager = require("./eventManager")
 local passengers = require("./passengers")
 local animationSystem = require("./animationSystem")
 local resourceAnimations = require("./animation")
+local Button = require("./button")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -206,7 +207,25 @@ function love.load()
 	-- loads once at start of game, setup game, and init/load assets etc.
 	-- create new menu
 	local layoutmanager = {
-		hover = nil,
+		buttons = {
+			Button:new(love.graphics.getWidth() / 2 - 70, love.graphics.getHeight() / 2, "New game", 40, function()
+				if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
+					resetGame()
+					Menu.navController:navigateTo(types.GameStateType.Gameplay)
+				end
+			end, { showBorder = true }),
+			Button:new(
+				love.graphics.getWidth() / 2 - 70,
+				love.graphics.getHeight() / 2 + 100,
+				"Continue",
+				40,
+				function()
+					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
+						Menu.navController:navigateTo(types.GameStateType.Gameplay)
+					end
+				end
+			),
+		},
 	}
 
 	local largeFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 96)
@@ -219,74 +238,21 @@ function love.load()
 		love.graphics.setFont(largeFont)
 		love.graphics.printf(constants.GAME_TITLE, 0, 100, love.graphics.getWidth(), "center")
 
-		local buttonWidth = 200
-		love.graphics.rectangle(
-			"line",
-			love.graphics.getWidth() / 2 - (self.hover == "new_game" and 100 or 75),
-			love.graphics.getHeight() / 2 - 25,
-			self.hover == "new_game" and buttonWidth + 50 or buttonWidth,
-			self.hover == "new_game" and 70 or 50
-		)
-
-		love.graphics.setFont(smallFont)
-
-		if self.hover == "new_game" then
-			love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 50))
-		else
-			love.graphics.setFont(smallFont)
+		for _, b in ipairs(self.buttons) do
+			b:draw()
 		end
-		love.graphics.printf(
-			"New Game",
-			love.graphics.getWidth() / 2 - 75,
-			love.graphics.getHeight() / 2 - 10,
-			buttonWidth,
-			"center"
-		)
-
-		if self.hover == "continue" then
-			love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 50))
-		else
-			love.graphics.setFont(smallFont)
-		end
-		love.graphics.printf(
-			"Continue",
-			love.graphics.getWidth() / 2 - 75,
-			love.graphics.getHeight() / 2 + 100,
-			buttonWidth,
-			"center"
-		)
 
 		love.graphics.setFont(smallFont)
 	end
+
 	function layoutmanager:update(dt)
 		local mx, my = love.mouse.getPosition()
-		if
-			mx >= love.graphics.getWidth() / 2 - 50
-			and mx <= love.graphics.getWidth() / 2 + 50
-			and my >= love.graphics.getHeight() / 2 - 25
-			and my <= love.graphics.getHeight() / 2 + 25
-		then
-			if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
-				resetGame()
-				Menu.navController:navigateTo(types.GameStateType.Gameplay)
-			else
-				self.hover = "new_game"
-			end
-		elseif
-			mx >= love.graphics.getWidth() / 2 - 50
-			and mx <= love.graphics.getWidth() / 2 + 50
-			and my >= love.graphics.getHeight() / 2 + 100
-			and my <= love.graphics.getHeight() / 2 + 150
-		then
-			if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
-				Menu.navController:navigateTo(types.GameStateType.Gameplay)
-			else
-				self.hover = "continue"
-			end
-		else
-			self.hover = nil
+		local mousePressed = love.mouse.isDown(1) -- left click
+		for _, b in ipairs(self.buttons) do
+			b:update(dt, mx, my, mousePressed)
 		end
 	end
+
 	Menu.layoutmanager = layoutmanager
 	Menu.navController = navController
 	GameState = types.GameStateType.Menu
