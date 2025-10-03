@@ -12,6 +12,7 @@ function Button:new(x, y, text, fontSize, onClick, opts)
 		opts = opts or {},
 		isHovered = false,
 		padding = 10,
+		wasMousePressed = false, -- track previous mouse state
 	}
 	obj.font = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", obj.baseFontSize)
 	obj.w = obj.font:getWidth(text) + obj.padding * 2
@@ -32,13 +33,16 @@ function Button:update(dt, mx, my, mousePressed)
 	if self.isHovered then
 		self.scale = math.min(self.scale + dt * 5, 1.2) -- grow
 		self.font = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", self.baseFontSize * 1.2)
-		if mousePressed and self.onClick then
+		-- Only fire onClick on mouse press, not hold, and only once until mouse is released
+		if mousePressed and not self.wasMousePressed and self.onClick then
 			self.onClick()
 		end
 	else
 		self.scale = math.max(self.scale - dt * 5, 1) -- shrink back
 		self.font = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", self.baseFontSize)
 	end
+
+	self.wasMousePressed = mousePressed
 end
 
 function Button:draw()

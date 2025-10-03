@@ -55,7 +55,8 @@ end
 local PassengerNodeHandler = {
 	randomPassengers = {},
 	BUTTON_SIZE_PIXELS = 240,
-	load = function(self)
+	buttons = {},
+	generateRandomPassengers = function(self)
 		-- initiliases anything for the node when it is randomly selected
 		-- eg. random choices or shop stuff etc.
 		local randomPassengers = {}
@@ -74,7 +75,26 @@ local PassengerNodeHandler = {
 		end
 		self.randomPassengers = randomPassengers
 	end,
+	load = function(self)
+		self:generateRandomPassengers()
+		self.buttons = {
+			Button:new(love.graphics.getWidth() / 2 - 175, 500, "Redraw (-10 money)", 24, function()
+				if Resources.money >= 10 then
+					updateResource("money", -10)
+					self:generateRandomPassengers()
+				end
+			end, { showBorder = true }),
+			Button:new(love.graphics.getWidth() / 2 + 75, 500, "Skip", 24, function()
+				markNodeAsVisited()
+			end, { showBorder = true }),
+		}
+	end,
 	update = function(self, dt)
+		local mx, my = love.mouse.getPosition()
+		local mousePressed = love.mouse.isDown(1)
+		for _, button in ipairs(self.buttons) do
+			button:update(dt, mx, my, mousePressed)
+		end
 		-- handle passenger specific updates if needed
 		-- passenger choices have images
 		-- event handlers for anything drawn
@@ -105,7 +125,7 @@ local PassengerNodeHandler = {
 					end
 				end
 			end
-		end
+		end	
 	end,
 	draw = function(self)
 		-- draws node specific stuff, ie. choices here... todo move more here?
@@ -134,11 +154,18 @@ local PassengerNodeHandler = {
 				"center"
 			)
 		end
+
+		for _, b in ipairs(self.buttons) do
+			b:draw()
+		end
 	end,
 }
 
 function updateResource(resourceType, amount)
 	if Resources[resourceType] then
+		if Resources[resourceType] <= 0 then
+			return False
+		end
 		Resources[resourceType] = Resources[resourceType] + amount
 		if Resources[resourceType] < 0 then
 			Resources[resourceType] = 0
@@ -331,23 +358,25 @@ function love.update(dt)
 		local visited = isPreviouslyVisited(PlayerPosition.x, PlayerPosition.y)
 
 		-- handle mouse click on choices
-		if not visited and CurrentNode and love.mouse.isDown(1) then
+		if not visited and CurrentNode then
 			local mx, my = love.mouse.getPosition()
 			if CurrentNode.type == constants.NODE_TYPES.Passenger then
 				PassengerNodeHandler:update(dt)
 			else
-				for i, choice in ipairs(CurrentNode.choices) do
-					if
-						mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
-						and mx <= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 200
-						and my >= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60
-						and my <= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 90
-					then
-						-- apply choice effect
-						if choice.effect then
-							choice.effect(updateResource)
+				if love.mouse.isDown(1) then
+					for i, choice in ipairs(CurrentNode.choices) do
+						if
+							mx >= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250
+							and mx <= love.graphics.getWidth() / 2 - 200 + (i - 1) * 250 + 200
+							and my >= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 60
+							and my <= love.graphics.getHeight() / 2 + constants.PLANET_RADIUS + 90
+						then
+							-- apply choice effect
+							if choice.effect then
+								choice.effect(updateResource)
+							end
+							markNodeAsVisited()
 						end
-						markNodeAsVisited()
 					end
 				end
 			end
