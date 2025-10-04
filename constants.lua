@@ -212,24 +212,70 @@ M.NODE_OPTIONS = {
 	[M.NODE_TYPES.ResourceFind] = {
 		{
 			handler = DefaultNodeHandler,
-			question = "You found a derelict ship. Do you want to scavenge it?",
+			question = "You found a derelict ship.",
 			choices = {
 				{
-					text = "Yes",
+					text = "Salvage",
 					effect = function(updateResource)
 						local outcome = math.random()
-						if outcome < 0.5 then
-							print("You found supplies! +15 oxygen")
-							updateResource("oxygen", 15)
-						else
-							print("The ship was empty.")
+						updateResource("money", 3)
+						if outcome < 0.3 then
+							updateResource("hull", -1)
 						end
 					end,
 				},
 				{
-					text = "No",
+					text = "Repair beacon",
 					effect = function()
-						print("Ignored derelict ship")
+						updateResource("fuel", -3)
+						updateResource("signal", 1)
+					end,
+				},
+			},
+			image = "satellite.png",
+			characterImage = "alien2.png",
+		},
+		{
+			handler = DefaultNodeHandler,
+			question = "A broken shuttle drifts in the void",
+			choices = {
+				{
+					text = "Board",
+					effect = function(updateResource)
+						local outcome = math.random()
+						if outcome < 0.5 then
+							updateResource("oxygen", 15)
+						else
+							updateResource("hull", -2)
+						end
+					end,
+				},
+				{
+					text = "Salvage shell",
+					effect = function()
+						updateResource("fuel", 1)
+					end,
+				},
+			},
+			image = "satellite.png",
+			characterImage = "alien2.png",
+		},
+		{
+			handler = DefaultNodeHandler,
+			question = "Sensors find asteroid mine",
+			choices = {
+				{
+					text = "Mine",
+					effect = function(updateResource)
+						updateResource("fuel", 3)
+						updateResource("hull", -1)
+					end,
+				},
+				{
+					text = "Power drill",
+					effect = function()
+						updateResource("fuel", -3)
+						updateResource("money", 20)
 					end,
 				},
 			},
