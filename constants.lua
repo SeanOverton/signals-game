@@ -63,7 +63,7 @@ M.NODE_OPTIONS = {
 			},
 			image = "alien.png",
 			characterImage = "alien2.png",
-			handler = DefaultNodeHandler
+			handler = DefaultNodeHandler,
 		},
 	},
 	[M.NODE_TYPES.Passenger] = {
@@ -75,27 +75,102 @@ M.NODE_OPTIONS = {
 		},
 	},
 	[M.NODE_TYPES.Anomaly] = {
-		{	
+		{
 			handler = DefaultNodeHandler,
-			question = "You encounter a space anomaly. Do you want to investigate?",
+			question = "Spacial Rift",
 			choices = {
 				{
-					text = "Yes",
+					text = "Investigate",
 					effect = function(updateResource)
 						local outcome = math.random()
 						if outcome < 0.5 then
-							print("You found a fuel cache! +20 fuel")
-							updateResource("fuel", 20)
+							updateResource("signal", 1)
+							updateResource("fuel", -10)
 						else
-							print("The anomaly damaged your ship! -10 oxygen")
+							updateResource("signal", 1)
 							updateResource("oxygen", -10)
 						end
 					end,
 				},
 				{
-					text = "No",
+					text = "Avoid",
 					effect = function()
 						print("Ignored anomaly")
+					end,
+				},
+			},
+			image = "dryPlanet.png",
+			characterImage = "alien2.png",
+		},
+		{
+			handler = DefaultNodeHandler,
+			question = "Temporal echo...",
+			choices = {
+				{
+					text = "Merge timelines",
+					effect = function(updateResource)
+						updateResource("fuel", -10)
+						updateResource("signal", 1)
+					end,
+				},
+				{
+					text = "Ignore",
+					effect = function()
+						print("Ignored anomaly")
+					end,
+				},
+			},
+			image = "dryPlanet.png",
+			characterImage = "alien2.png",
+		},
+		{
+			handler = DefaultNodeHandler,
+			question = "Quantum storm",
+			choices = {
+				{
+					text = "Stabilize with thrusters",
+					effect = function(updateResource)
+						updateResource("fuel", -5)
+						updateResource("oxygen", 5)
+					end,
+				},
+				{
+					text = "Ride it out",
+					effect = function()
+						local random = math.random()
+						if random < 0.5 then
+							updateResource("money", 3)
+						else
+							updateResource("fuel", -3)
+						end
+					end,
+				},
+			},
+			image = "dryPlanet.png",
+			characterImage = "alien2.png",
+		},
+		{
+			handler = DefaultNodeHandler,
+			question = "Graviton well",
+			choices = {
+				{
+					text = "Escape (burn fuel)",
+					effect = function(updateResource)
+						updateResource("fuel", -5)
+						updateResource("signal", 1)
+					end,
+				},
+				{
+					text = "Ride it out",
+					effect = function()
+						local random = math.random()
+						if random < 0.5 then
+							updateResource("hull", -1)
+							updateResource("money", 3)
+						else
+							updateResource("hull", -1)
+							updateResource("oxygen", 3)
+						end
 					end,
 				},
 			},

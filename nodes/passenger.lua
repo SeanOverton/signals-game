@@ -23,7 +23,7 @@ local PassengerNodeHandler = {
 		end
 		self.randomPassengers = randomPassengers
 	end,
-	load = function(self)
+	load = function(self, _)
 		self:generateRandomPassengers()
 		self.buttons = {
 			Button:new(love.graphics.getWidth() / 2 - 175, 500, "Redraw (-10 money)", 24, function()

@@ -20,6 +20,7 @@ PlayerShip = {
 Resources = {
 	fuel = constants.DEFAULT_RESOURCES.FUEL,
 	oxygen = constants.DEFAULT_RESOURCES.OXYGEN,
+	hull = 30,
 	money = constants.DEFAULT_RESOURCES.MONEY,
 	signals = constants.DEFAULT_RESOURCES.SIGNALS,
 }
@@ -345,7 +346,9 @@ function handleNavigateToNewNode(direction)
 		PreviousNode = CurrentNode
 	end
 	CurrentNode = getRandomNode()
-	print(CurrentNode.handler ~= nil)
+	if not CurrentNode or CurrentNode.handler == nil then
+		return
+	end
 	CurrentNode.handler:load(CurrentNode)
 end
 
