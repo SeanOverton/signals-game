@@ -1,8 +1,8 @@
 local types = require("./types/main")
-local passengers = require("./passengers")
+local PassengerNodeHandler = require("./nodes/passenger")
+local DefaultNodeHandler = require("./nodes/default")
 
 local M = {}
-
 M.GAME_TITLE = "Signals"
 M.MAX_WIDTH = 10
 M.PLAYER_RADIUS = 10
@@ -63,6 +63,7 @@ M.NODE_OPTIONS = {
 			},
 			image = "alien.png",
 			characterImage = "alien2.png",
+			handler = DefaultNodeHandler
 		},
 	},
 	[M.NODE_TYPES.Passenger] = {
@@ -70,10 +71,12 @@ M.NODE_OPTIONS = {
 			type = M.NODE_TYPES.Passenger,
 			question = "You encounter 2 aliens seeking passage. Let one on board?",
 			characterImage = "alien.png",
+			handler = PassengerNodeHandler,
 		},
 	},
 	[M.NODE_TYPES.Anomaly] = {
-		{
+		{	
+			handler = DefaultNodeHandler,
 			question = "You encounter a space anomaly. Do you want to investigate?",
 			choices = {
 				{
@@ -102,6 +105,7 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.Combat] = {
 		{
+			handler = DefaultNodeHandler,
 			question = "You are ambushed by space pirates! Do you want to fight or flee?",
 			choices = {
 				{
@@ -132,6 +136,7 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.ResourceFind] = {
 		{
+			handler = DefaultNodeHandler,
 			question = "You found a derelict ship. Do you want to scavenge it?",
 			choices = {
 				{
@@ -159,6 +164,7 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.EmptySpace] = {
 		{
+			handler = DefaultNodeHandler,
 			question = "You are in empty space. Nothing happens.",
 			choices = {
 				{
@@ -174,12 +180,12 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.Story] = {
 		{
+			handler = DefaultNodeHandler,
 			question = "You receive a distress signal from a nearby planet. Do you want to investigate?",
 			choices = {
 				{
 					text = "Yes",
 					effect = function(updateResource)
-						print("You rescued survivors! +1 signal")
 						updateResource("signals", 1)
 					end,
 				},

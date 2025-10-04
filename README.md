@@ -20,6 +20,7 @@ https://github.com/mtanksl/LOVELi
 - refactor nodes to be more extensible, use object
 - Implement story
 - refactor ship
+- add more events to trigger effects of passengers
 - Implement shop, and other node types
 - Implement ship upgrades (more effects on the situations)
 - Implement collections, runs etc.
