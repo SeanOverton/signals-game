@@ -5,6 +5,8 @@ local passengers = require("./passengers")
 local animationSystem = require("./animationSystem")
 local resourceAnimations = require("./animation")
 local Button = require("./button")
+local Modal = require("./modal")
+local modal = nil
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -55,6 +57,9 @@ end
 
 function updateResource(resourceType, amount)
 	if Resources[resourceType] then
+		if amount == 0 then
+			return
+		end
 		Resources[resourceType] = Resources[resourceType] + amount
 		if Resources[resourceType] < 0 then
 			Resources[resourceType] = 0
@@ -117,6 +122,9 @@ function love.load()
 			GameState = state
 		end,
 	}
+
+	-- init
+	modal = Modal:new()
 
 	resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
 
@@ -183,6 +191,141 @@ function isPreviouslyVisited(x, y)
 	return false
 end
 
+local CurrentPassengers = {
+	SIZE = 120,
+	buttons = {},
+	update = function(self, dt)
+		self.buttons = {}
+		-- configure buttons from the choices
+
+		-- love.graphics.printf(
+		-- 	"i",
+		-- 	love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10) + SIZE - 17,
+		-- 	13,
+		-- 	5,
+		-- 	"center"
+		-- )
+		-- love.graphics.circle(
+		-- 	"line",
+		-- 	love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10) + SIZE - 15,
+		-- 	25,
+		-- 	12,
+		-- 	12
+		-- )
+
+		for i, p in ipairs(PlayerPassengers) do
+			local newButton = Button:new(
+				love.graphics.getWidth() / 2
+					- (PlayerShip.MAX_PASSENGERS * self.SIZE) / 2
+					+ (i - 1) * (self.SIZE + 10)
+					+ self.SIZE
+					- 25,
+				13,
+				"i",
+				22,
+				function()
+					print("passenger info clicked" .. p.name)
+					modal:open(function()
+						local FULL_SIZE = 300
+						local img = love.graphics.newImage(p.image)
+						love.graphics.draw(
+							img,
+							love.graphics.getWidth() / 2 - FULL_SIZE / 3,
+							30,
+							0,
+							FULL_SIZE / img:getWidth(),
+							FULL_SIZE / img:getHeight()
+						)
+						love.graphics.printf(
+							p.name,
+							love.graphics.getWidth() / 2 - 20,
+							FULL_SIZE + 60,
+							self.SIZE + 10,
+							"center"
+						)
+						love.graphics.printf(
+							"Effects (todo)",
+							love.graphics.getWidth() / 2 - 20,
+							FULL_SIZE + 100,
+							self.SIZE + 10,
+							"center"
+						)
+					end)
+				end,
+				{ showBorder = true }
+			)
+			table.insert(self.buttons, newButton)
+		end
+
+		local mx, my = love.mouse.getPosition()
+		local mousePressed = love.mouse.isDown(1)
+		for _, button in ipairs(self.buttons) do
+			button:update(dt, mx, my, mousePressed)
+		end
+	end,
+	draw = function(self)
+		for _, b in ipairs(self.buttons) do
+			b:draw()
+		end
+
+		-- print current passengers at top middle of screen with names and images and empty slots
+		for i = 1, PlayerShip.MAX_PASSENGERS do
+			if PlayerPassengers[i] then
+				local passenger = PlayerPassengers[i]
+				local img = love.graphics.newImage(passenger.image)
+				love.graphics.rectangle(
+					"line",
+					love.graphics.getWidth() / 2
+						- (PlayerShip.MAX_PASSENGERS * self.SIZE) / 2
+						+ (i - 1) * (self.SIZE + 10),
+					10,
+					self.SIZE,
+					self.SIZE
+				)
+				love.graphics.draw(
+					img,
+					love.graphics.getWidth() / 2
+						- (PlayerShip.MAX_PASSENGERS * self.SIZE) / 2
+						+ (i - 1) * (self.SIZE + 10)
+						+ 5,
+					15,
+					0,
+					(self.SIZE - 10) / img:getWidth(),
+					(self.SIZE - 10) / img:getHeight()
+				)
+				love.graphics.printf(
+					passenger.name,
+					love.graphics.getWidth() / 2
+						- (PlayerShip.MAX_PASSENGERS * self.SIZE) / 2
+						+ (i - 1) * (self.SIZE + 10),
+					10 + self.SIZE + 10,
+					self.SIZE + 10,
+					"center"
+				)
+			else
+				love.graphics.rectangle(
+					"line",
+					love.graphics.getWidth() / 2
+						- (PlayerShip.MAX_PASSENGERS * self.SIZE) / 2
+						+ (i - 1) * (self.SIZE + 10),
+					10,
+					self.SIZE,
+					self.SIZE
+				)
+				love.graphics.printf(
+					"Empty",
+					love.graphics.getWidth() / 2
+						- (PlayerShip.MAX_PASSENGERS * self.SIZE) / 2
+						+ (i - 1) * (self.SIZE + 10),
+					10 + self.SIZE + 10,
+					self.SIZE + 10,
+					"center"
+				)
+			end
+		end
+	end,
+}
+
 function love.update(dt)
 	-- input handlng, game logic, calculations, updating positions etc.
 	-- receives dt: deltatime arg, runs 60/ps, ie. every frame
@@ -194,6 +337,7 @@ function love.update(dt)
 			PreviousNode = CurrentNode
 			CurrentNode.handler:load(CurrentNode)
 		end
+
 		if Resources.fuel <= 0 then
 			print("Out of fuel! Game Over.")
 			if Menu.navController and Menu.navController.navigateTo then
@@ -220,6 +364,11 @@ function love.update(dt)
 			return
 		end
 
+		if modal.active then
+			modal:update(dt)
+			return
+		end
+		CurrentPassengers:update(dt)
 		animationSystem:update(dt)
 
 		local PLANET_SPEED = 3
@@ -332,8 +481,15 @@ function love.update(dt)
 	end
 end
 
+local moveCount = 0
+
 function handleNavigateToNewNode(direction)
 	updateResource("fuel", -constants.FUEL_CONSUMPTION_PER_MOVE)
+	-- more passengers consumes more oxygen
+	updateResource("oxygen", -(constants.OXYGEN_CONSUMPTION_PER_MOVE + #PlayerPassengers))
+
+	moveCount = moveCount + 1
+	eventManager.emit("move", moveCount)
 
 	-- animate planet sliding off screen and new one sliding in
 	Moving = true
@@ -346,6 +502,15 @@ function handleNavigateToNewNode(direction)
 		PreviousNode = CurrentNode
 	end
 	CurrentNode = getRandomNode()
+	if CurrentNode and CurrentNode.type ~= nil then
+		local function capitalizeFirstLetter(str)
+			if not str or #str == 0 then
+				return str -- Handle empty or nil strings
+			end
+			return string.upper(string.sub(str, 1, 1)) .. string.sub(str, 2)
+		end
+		eventManager.emit("visited" .. capitalizeFirstLetter(CurrentNode.type) .. "Node")
+	end
 	if not CurrentNode or CurrentNode.handler == nil then
 		return
 	end
@@ -480,55 +645,6 @@ function drawCurrentNode()
 	processDrawingNodeType(CurrentNode)
 end
 
-function drawCurrentPassengers()
-	local SIZE = 120
-
-	-- print current passengers at top middle of screen with names and images and empty slots
-	for i = 1, PlayerShip.MAX_PASSENGERS do
-		if PlayerPassengers[i] then
-			local passenger = PlayerPassengers[i]
-			local img = love.graphics.newImage(passenger.image)
-			love.graphics.rectangle(
-				"line",
-				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
-				10,
-				SIZE,
-				SIZE
-			)
-			love.graphics.draw(
-				img,
-				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10) + 5,
-				15,
-				0,
-				(SIZE - 10) / img:getWidth(),
-				(SIZE - 10) / img:getHeight()
-			)
-			love.graphics.printf(
-				passenger.name,
-				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
-				10 + SIZE + 10,
-				SIZE + 10,
-				"center"
-			)
-		else
-			love.graphics.rectangle(
-				"line",
-				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
-				10,
-				SIZE,
-				SIZE
-			)
-			love.graphics.printf(
-				"Empty",
-				love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10),
-				10 + SIZE + 10,
-				SIZE + 10,
-				"center"
-			)
-		end
-	end
-end
-
 function drawSpaceBg()
 	-- load bg and always spin it opposite to planet?
 	local BG_ROTATION_SPEED = -0.01
@@ -601,18 +717,19 @@ function love.draw()
 		-- print resources
 		-- set bg as dark block colour rectangle behind text for readability
 		love.graphics.setColor(0, 0, 0, 0.9)
-		love.graphics.rectangle("fill", 0, 30, 200, 180)
+		love.graphics.rectangle("fill", 0, 30, 200, 220)
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 40))
 		love.graphics.print("Fuel: " .. Resources.fuel, 10, 40)
 		love.graphics.print("Oxygen: " .. Resources.oxygen, 10, 80)
 		love.graphics.print("Money: " .. Resources.money, 10, 120)
-		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 160)
+		love.graphics.print("Hull: " .. Resources.hull, 10, 160)
+		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 200)
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
 
-		animationSystem:draw()
-
-		drawCurrentPassengers()
+		CurrentPassengers:draw()
 		drawCurrentNode()
+		animationSystem:draw()
+		modal:draw()
 	end
 end

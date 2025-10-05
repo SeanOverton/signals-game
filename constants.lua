@@ -7,6 +7,7 @@ M.GAME_TITLE = "Signals"
 M.MAX_WIDTH = 10
 M.PLAYER_RADIUS = 10
 M.FUEL_CONSUMPTION_PER_MOVE = 1
+M.OXYGEN_CONSUMPTION_PER_MOVE = 1
 M.DEFAULT_RESOURCES = {
 	FUEL = 30,
 	OXYGEN = 100,
@@ -41,6 +42,7 @@ M.Probabilities = {
 M.NODE_OPTIONS = {
 	[M.NODE_TYPES.Shop] = {
 		{
+			type = M.NODE_TYPES.Shop,
 			question = "You encounter a space trader. Do you want to buy fuel (+20) for 10 money (-10)?",
 			choices = {
 				{
@@ -76,6 +78,7 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.Anomaly] = {
 		{
+			type = M.NODE_TYPES.Anomaly,
 			handler = DefaultNodeHandler,
 			question = "Spacial Rift",
 			choices = {
@@ -103,6 +106,7 @@ M.NODE_OPTIONS = {
 			characterImage = "alien2.png",
 		},
 		{
+			type = M.NODE_TYPES.Anomaly,
 			handler = DefaultNodeHandler,
 			question = "Temporal echo...",
 			choices = {
@@ -125,6 +129,7 @@ M.NODE_OPTIONS = {
 		},
 		{
 			handler = DefaultNodeHandler,
+			type = M.NODE_TYPES.Anomaly,
 			question = "Quantum storm",
 			choices = {
 				{
@@ -151,6 +156,7 @@ M.NODE_OPTIONS = {
 		},
 		{
 			handler = DefaultNodeHandler,
+			type = M.NODE_TYPES.Anomaly,
 			question = "Graviton well",
 			choices = {
 				{
@@ -180,28 +186,93 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.Combat] = {
 		{
+			type = M.NODE_TYPES.Combat,
 			handler = DefaultNodeHandler,
-			question = "You are ambushed by space pirates! Do you want to fight or flee?",
+			question = "You encounter Scavenger raiders!",
 			choices = {
 				{
-					text = "Fight",
+					text = "Pay (-2 money)",
 					effect = function(updateResource)
 						local outcome = math.random()
+						updateResource("money", -2)
+					end,
+				},
+				{
+					text = "Fight (-2 fuel, 50% -1 hull or 50% +3 money)",
+					effect = function(updateResource)
+						updateResource("fuel", -2)
+						local outcome = math.random()
 						if outcome < 0.5 then
-							print("You defeated the pirates! +20 money")
-							updateResource("money", 20)
-							Resources.money = Resources.money + 20
+							updateResource("money", 3)
 						else
-							print("You were injured in the fight! -20 oxygen")
-							updateResource("oxygen", -20)
+							updateResource("hull", -1)
 						end
 					end,
 				},
 				{
-					text = "Flee",
+					text = "Flee (-2 fuel, 50% -1 hull)",
 					effect = function(updateResource)
-						print("You fled but lost some fuel! -10 fuel")
-						updateResource("fuel", -10)
+						updateResource("fuel", -2)
+						local outcome = math.random()
+						if outcome < 0.5 then
+							updateResource("hull", -1)
+						end
+					end,
+				},
+			},
+			image = "planet.png",
+			characterImage = "alien.png",
+		},
+		{
+			type = M.NODE_TYPES.Combat,
+			handler = DefaultNodeHandler,
+			question = "You are ambushed by symbiotes",
+			choices = {
+				{
+					text = "Accept merger (+10 oxygen, but O(2) drains faster -1 each jump)",
+					effect = function(updateResource)
+						local outcome = math.random()
+						updateResource("oxygen", 10)
+					end,
+				},
+				{
+					text = "Burn it off (-5 fuel, -5 money)",
+					effect = function(updateResource)
+						updateResource("money", -5)
+						updateResource("fuel", -5)
+					end,
+				},
+			},
+			image = "planet.png",
+			characterImage = "alien.png",
+		},
+		{
+			type = M.NODE_TYPES.Combat,
+			handler = DefaultNodeHandler,
+			question = "A space warload blocks your trajectory...",
+			choices = {
+				{
+					text = "Duel (-3 fuel, -1 hull, +7 money)",
+					effect = function(updateResource)
+						updateResource("money", 7)
+						updateResource("hull", -1)
+						updateResource("fuel", -3)
+					end,
+				},
+				{
+					text = "Bribe (-3 money)",
+					effect = function(updateResource)
+						updateResource("money", -3)
+					end,
+				},
+				{
+					text = "Run (-3 fuel, 50% -2 hull)",
+					effect = function(updateResource)
+						updateResource("fuel", -3)
+						local outcome = math.random()
+						if outcome < 0.5 then
+							updateResource("hull", -2)
+						end
 					end,
 				},
 			},
@@ -211,6 +282,7 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.ResourceFind] = {
 		{
+			type = M.NODE_TYPES.ResourceFind,
 			handler = DefaultNodeHandler,
 			question = "You found a derelict ship.",
 			choices = {
@@ -236,6 +308,7 @@ M.NODE_OPTIONS = {
 			characterImage = "alien2.png",
 		},
 		{
+			type = M.NODE_TYPES.ResourceFind,
 			handler = DefaultNodeHandler,
 			question = "A broken shuttle drifts in the void",
 			choices = {
@@ -261,6 +334,7 @@ M.NODE_OPTIONS = {
 			characterImage = "alien2.png",
 		},
 		{
+			type = M.NODE_TYPES.ResourceFind,
 			handler = DefaultNodeHandler,
 			question = "Sensors find asteroid mine",
 			choices = {
@@ -285,6 +359,7 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.EmptySpace] = {
 		{
+			type = M.NODE_TYPES.EmptySpace,
 			handler = DefaultNodeHandler,
 			question = "You are in empty space. Nothing happens.",
 			choices = {
@@ -301,6 +376,7 @@ M.NODE_OPTIONS = {
 	},
 	[M.NODE_TYPES.Story] = {
 		{
+			type = M.NODE_TYPES.Story,
 			handler = DefaultNodeHandler,
 			question = "You receive a distress signal from a nearby planet. Do you want to investigate?",
 			choices = {

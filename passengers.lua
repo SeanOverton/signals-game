@@ -59,17 +59,17 @@ local CosmicGambler = Passenger:new("Cosmic Gambler", "cosmicGambler.png", "onGa
 	-- boost chance when gambling at the shops
 end)
 
-local BreatherFungus = Passenger:new("Breather Fungus", "mushroom.png", "jump", function(index)
+local BreatherFungus = Passenger:new("Breather Fungus", "mushroom.png", "move", function(index)
 	if index % 2 == 0 then
 		Resources.oxygen = Resources.oxygen + 1
 	end
 end)
 
-local Stargazer = Passenger:new("Stargazer", "stargazer.png", "signalUpdated", function()
+local Stargazer = Passenger:new("Stargazer", "stargazer.png", "signalsUpdated", function()
 	Resources.signals = Resources.signals + 1
 end)
 
-local OxygenSniffer = Passenger:new("Oxygen sniffer", "oxygenSniffer.png", "visitResourceFindNode", function()
+local OxygenSniffer = Passenger:new("Oxygen sniffer", "oxygenSniffer.png", "visitedResourceFindNode", function()
 	Resources.oxygen = Resources.oxygen + 1
 end)
 

@@ -17,10 +17,12 @@ https://github.com/mtanksl/LOVELi
 - More art assets for more nodes, generally update UI. more passegers
 
 - Then:
-- refactor nodes to be more extensible, use object
-- Implement story
+- refactor nodes to be more extensible, use object... kinda?
 - refactor ship
-- add more events to trigger effects of passengers
+- add more events to trigger effects of passengers, start animations
+- UI for ship
+- Implement story
 - Implement shop, and other node types
 - Implement ship upgrades (more effects on the situations)
+- make nodes generally more interesting
 - Implement collections, runs etc.
