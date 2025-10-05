@@ -238,16 +238,23 @@ local CurrentPassengers = {
 						)
 						love.graphics.printf(
 							p.name,
-							love.graphics.getWidth() / 2 - 20,
+							love.graphics.getWidth() / 2 - FULL_SIZE / 3,
 							FULL_SIZE + 60,
-							self.SIZE + 10,
+							FULL_SIZE,
 							"center"
 						)
 						love.graphics.printf(
-							"Effects (todo)",
-							love.graphics.getWidth() / 2 - 20,
+							"Effects:",
+							love.graphics.getWidth() / 2 - FULL_SIZE / 3,
 							FULL_SIZE + 100,
-							self.SIZE + 10,
+							FULL_SIZE,
+							"center"
+						)
+						love.graphics.printf(
+							p.effectsDescription,
+							love.graphics.getWidth() / 2 - FULL_SIZE / 3,
+							FULL_SIZE + 140,
+							FULL_SIZE,
 							"center"
 						)
 					end)
