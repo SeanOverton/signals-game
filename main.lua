@@ -7,6 +7,7 @@ local resourceAnimations = require("./animation")
 local Button = require("./button")
 local Modal = require("./modal")
 local modal = nil
+local Rocket = require("./rocket")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -47,8 +48,8 @@ local displayedText = ""
 -- moving nodes variables
 local PreviousNode = nil
 local PrevPlanetPosition = { x = 0, y = 0 }
-local Moving = false
-local Direction = nil
+Moving = false
+Direction = nil
 local NewPlanetPosition = { x = 0, y = 0 }
 
 function markNodeAsVisited()
@@ -127,6 +128,8 @@ function love.load()
 	modal = Modal:new()
 
 	resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
+
+	Rocket:load()
 
 	-- loads once at start of game, setup game, and init/load assets etc.
 	-- create new menu
@@ -377,6 +380,7 @@ function love.update(dt)
 		end
 		CurrentPassengers:update(dt)
 		animationSystem:update(dt)
+		Rocket:update(dt)
 
 		local PLANET_SPEED = 3
 
@@ -735,6 +739,7 @@ function love.draw()
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
 
 		CurrentPassengers:draw()
+		Rocket:draw()
 		drawCurrentNode()
 		animationSystem:draw()
 		modal:draw()
