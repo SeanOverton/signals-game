@@ -25,7 +25,7 @@ PlayerShip = {
 Resources = {
 	fuel = constants.DEFAULT_RESOURCES.FUEL,
 	oxygen = constants.DEFAULT_RESOURCES.OXYGEN,
-	hull = 30,
+	hull = constants.DEFAULT_RESOURCES.HULL,
 	money = constants.DEFAULT_RESOURCES.MONEY,
 	signals = constants.DEFAULT_RESOURCES.SIGNALS,
 }
@@ -597,6 +597,9 @@ function processDrawingNodeType(currentNode)
 		"center"
 	)
 
+	if not CurrentNode or not CurrentNode.handler then
+		return
+	end
 	CurrentNode.handler:draw()
 end
 

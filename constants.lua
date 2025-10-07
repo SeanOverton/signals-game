@@ -13,8 +13,9 @@ M.DEFAULT_RESOURCES = {
 	OXYGEN = 100,
 	MONEY = 50,
 	SIGNALS = 0,
+	HULL = 30,
 }
-M.SIGNAL_TOTAL_GOAL = 5
+M.SIGNAL_TOTAL_GOAL = 10
 
 M.NODE_TYPES = {
 	Passenger = "passenger",
