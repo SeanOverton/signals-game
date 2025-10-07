@@ -19,11 +19,16 @@ https://github.com/mtanksl/LOVELi
 - refactor ship
 - UI for ship, done
 - Implement story, created custscenes to some extent? can add more here
+- make decisions more visible, see effects with overlay, done
 
-- make decisions more visible, see effects with overlay
 - make nodes generally more interesting, see gpt response -> delay, animate some effects
+    - slow them down
 - Implement shop, and other node types
 - Implement ship upgrades (more effects on the situations)
+    - animate these too
+- more cut-scenes (at start for more story/context)
 - add more events to trigger effects of passengers, start animations
+    - more animations in general
 - then just add more nodes and characters
 - runs
+- music/sound
