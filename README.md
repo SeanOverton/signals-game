@@ -19,10 +19,12 @@ https://github.com/mtanksl/LOVELi
 - Then:
 - refactor nodes to be more extensible, use object... kinda?
 - refactor ship
-- add more events to trigger effects of passengers, start animations
-- UI for ship
-- Implement story
+- UI for ship, done
+- Implement story, created custscenes to some extent? can add more here
+- make decisions more visible, see effects with overlay
+- make nodes generally more interesting, see gpt response -> delay, animate some effects
 - Implement shop, and other node types
 - Implement ship upgrades (more effects on the situations)
-- make nodes generally more interesting
-- Implement collections, runs etc.
+- add more events to trigger effects of passengers, start animations
+- then just add more nodes and characters
+- runs

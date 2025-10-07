@@ -104,7 +104,7 @@ function Collectibles:draw()
 		else
 			-- Label
 			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.print(p.data.name, px, py + img:getHeight() + 80)
+			love.graphics.print(p.data.name, px, py + img:getHeight() + 65)
 		end
 
 		col = col + 1
