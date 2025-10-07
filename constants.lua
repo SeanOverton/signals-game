@@ -43,10 +43,11 @@ M.NODE_OPTIONS = {
 	[M.NODE_TYPES.Shop] = {
 		{
 			type = M.NODE_TYPES.Shop,
-			question = "You encounter a space trader. Do you want to buy fuel (+20) for 10 money (-10)?",
+			question = "You encounter a space trader. Do you want to buy fuel?",
 			choices = {
 				{
-					text = "Yes",
+					text = "Trade",
+					description = "Spend 10 money to gain 20 fuel.",
 					effect = function(updateResource)
 						if Resources.money < 10 then
 							print("Not enough money to buy fuel.")
@@ -57,7 +58,8 @@ M.NODE_OPTIONS = {
 					end,
 				},
 				{
-					text = "No",
+					text = "Skip",
+					description = "No effect. You ignore the trader.",
 					effect = function()
 						print("Ignored trader")
 					end,
@@ -68,22 +70,26 @@ M.NODE_OPTIONS = {
 			handler = DefaultNodeHandler,
 		},
 	},
+
 	[M.NODE_TYPES.Passenger] = {
 		{
 			type = M.NODE_TYPES.Passenger,
-			question = "You encounter 2 aliens seeking passage. Let one on board?",
+			question = "You encounter two aliens seeking passage. Let one on board?",
 			characterImage = "alien.png",
+			description = "Choosing a passenger grants unique bonuses or penalties during travel.",
 			handler = PassengerNodeHandler,
 		},
 	},
+
 	[M.NODE_TYPES.Anomaly] = {
 		{
 			type = M.NODE_TYPES.Anomaly,
 			handler = DefaultNodeHandler,
-			question = "Spacial Rift",
+			question = "Spatial Rift detected ahead.",
 			choices = {
 				{
 					text = "Investigate",
+					description = "Gain +1 signal and lose either 10 fuel or 10 oxygen (50% chance).",
 					effect = function(updateResource)
 						local outcome = math.random()
 						if outcome < 0.5 then
@@ -97,6 +103,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "Avoid",
+					description = "No change to resources.",
 					effect = function()
 						print("Ignored anomaly")
 					end,
@@ -108,10 +115,11 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.Anomaly,
 			handler = DefaultNodeHandler,
-			question = "Temporal echo...",
+			question = "Temporal echo... distorted signals nearby.",
 			choices = {
 				{
 					text = "Merge timelines",
+					description = "Lose 10 fuel and gain +1 signal.",
 					effect = function(updateResource)
 						updateResource("fuel", -10)
 						updateResource("signal", 1)
@@ -119,6 +127,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "Ignore",
+					description = "No effect.",
 					effect = function()
 						print("Ignored anomaly")
 					end,
@@ -130,18 +139,20 @@ M.NODE_OPTIONS = {
 		{
 			handler = DefaultNodeHandler,
 			type = M.NODE_TYPES.Anomaly,
-			question = "Quantum storm",
+			question = "Quantum storm brewing ahead.",
 			choices = {
 				{
-					text = "Stabilize with thrusters",
+					text = "Stabilize",
+					description = "Lose 5 fuel and gain +5 oxygen.",
 					effect = function(updateResource)
 						updateResource("fuel", -5)
 						updateResource("oxygen", 5)
 					end,
 				},
 				{
-					text = "Ride it out",
-					effect = function()
+					text = "Ride it",
+					description = "50% chance to gain +3 money or lose 3 fuel.",
+					effect = function(updateResource)
 						local random = math.random()
 						if random < 0.5 then
 							updateResource("money", 3)
@@ -157,18 +168,20 @@ M.NODE_OPTIONS = {
 		{
 			handler = DefaultNodeHandler,
 			type = M.NODE_TYPES.Anomaly,
-			question = "Graviton well",
+			question = "You're caught in a graviton well.",
 			choices = {
 				{
-					text = "Escape (burn fuel)",
+					text = "Escape",
+					description = "Lose 5 fuel and gain +1 signal.",
 					effect = function(updateResource)
 						updateResource("fuel", -5)
 						updateResource("signal", 1)
 					end,
 				},
 				{
-					text = "Ride it out",
-					effect = function()
+					text = "Endure",
+					description = "Lose 1 hull and gain either +3 money or +3 oxygen (50% chance).",
+					effect = function(updateResource)
 						local random = math.random()
 						if random < 0.5 then
 							updateResource("hull", -1)
@@ -184,6 +197,7 @@ M.NODE_OPTIONS = {
 			characterImage = "alien2.png",
 		},
 	},
+
 	[M.NODE_TYPES.Combat] = {
 		{
 			type = M.NODE_TYPES.Combat,
@@ -191,14 +205,15 @@ M.NODE_OPTIONS = {
 			question = "You encounter Scavenger raiders!",
 			choices = {
 				{
-					text = "Pay (-2 money)",
+					text = "Pay",
+					description = "Lose 2 money to avoid the fight.",
 					effect = function(updateResource)
-						local outcome = math.random()
 						updateResource("money", -2)
 					end,
 				},
 				{
-					text = "Fight (-2 fuel, 50% -1 hull or 50% +3 money)",
+					text = "Fight",
+					description = "Lose 2 fuel and either gain +3 money or lose 1 hull (50% chance).",
 					effect = function(updateResource)
 						updateResource("fuel", -2)
 						local outcome = math.random()
@@ -210,7 +225,8 @@ M.NODE_OPTIONS = {
 					end,
 				},
 				{
-					text = "Flee (-2 fuel, 50% -1 hull)",
+					text = "Flee",
+					description = "Lose 2 fuel and 50% chance to lose 1 hull.",
 					effect = function(updateResource)
 						updateResource("fuel", -2)
 						local outcome = math.random()
@@ -226,17 +242,18 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.Combat,
 			handler = DefaultNodeHandler,
-			question = "You are ambushed by symbiotes",
+			question = "You are ambushed by symbiotes!",
 			choices = {
 				{
-					text = "Accept merger (+10 oxygen, but O(2) drains faster -1 each jump)",
+					text = "Merge",
+					description = "Gain +10 oxygen but permanently lose 1 oxygen each jump.",
 					effect = function(updateResource)
-						local outcome = math.random()
 						updateResource("oxygen", 10)
 					end,
 				},
 				{
-					text = "Burn it off (-5 fuel, -5 money)",
+					text = "Burn",
+					description = "Lose 5 fuel and 5 money to destroy the symbiotes.",
 					effect = function(updateResource)
 						updateResource("money", -5)
 						updateResource("fuel", -5)
@@ -249,10 +266,11 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.Combat,
 			handler = DefaultNodeHandler,
-			question = "A space warload blocks your trajectory...",
+			question = "A space warlord blocks your trajectory...",
 			choices = {
 				{
-					text = "Duel (-3 fuel, -1 hull, +7 money)",
+					text = "Duel",
+					description = "Lose 3 fuel and 1 hull, gain +7 money.",
 					effect = function(updateResource)
 						updateResource("money", 7)
 						updateResource("hull", -1)
@@ -260,13 +278,15 @@ M.NODE_OPTIONS = {
 					end,
 				},
 				{
-					text = "Bribe (-3 money)",
+					text = "Bribe",
+					description = "Lose 3 money to pass safely.",
 					effect = function(updateResource)
 						updateResource("money", -3)
 					end,
 				},
 				{
-					text = "Run (-3 fuel, 50% -2 hull)",
+					text = "Run",
+					description = "Lose 3 fuel and 50% chance to lose 2 hull.",
 					effect = function(updateResource)
 						updateResource("fuel", -3)
 						local outcome = math.random()
@@ -280,14 +300,16 @@ M.NODE_OPTIONS = {
 			characterImage = "alien.png",
 		},
 	},
+
 	[M.NODE_TYPES.ResourceFind] = {
 		{
 			type = M.NODE_TYPES.ResourceFind,
 			handler = DefaultNodeHandler,
-			question = "You found a derelict ship.",
+			question = "You find a derelict ship drifting nearby.",
 			choices = {
 				{
 					text = "Salvage",
+					description = "Gain +3 money and 30% chance to lose 1 hull.",
 					effect = function(updateResource)
 						local outcome = math.random()
 						updateResource("money", 3)
@@ -297,8 +319,9 @@ M.NODE_OPTIONS = {
 					end,
 				},
 				{
-					text = "Repair beacon",
-					effect = function()
+					text = "Repair",
+					description = "Lose 3 fuel and gain +1 signal.",
+					effect = function(updateResource)
 						updateResource("fuel", -3)
 						updateResource("signal", 1)
 					end,
@@ -310,10 +333,11 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.ResourceFind,
 			handler = DefaultNodeHandler,
-			question = "A broken shuttle drifts in the void",
+			question = "A broken shuttle drifts in the void.",
 			choices = {
 				{
 					text = "Board",
+					description = "50% chance to gain +15 oxygen or lose 2 hull.",
 					effect = function(updateResource)
 						local outcome = math.random()
 						if outcome < 0.5 then
@@ -324,8 +348,9 @@ M.NODE_OPTIONS = {
 					end,
 				},
 				{
-					text = "Salvage shell",
-					effect = function()
+					text = "Salvage",
+					description = "Gain +1 fuel.",
+					effect = function(updateResource)
 						updateResource("fuel", 1)
 					end,
 				},
@@ -336,18 +361,20 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.ResourceFind,
 			handler = DefaultNodeHandler,
-			question = "Sensors find asteroid mine",
+			question = "Sensors detect an asteroid mine.",
 			choices = {
 				{
 					text = "Mine",
+					description = "Gain +3 fuel and lose 1 hull.",
 					effect = function(updateResource)
 						updateResource("fuel", 3)
 						updateResource("hull", -1)
 					end,
 				},
 				{
-					text = "Power drill",
-					effect = function()
+					text = "Drill",
+					description = "Lose 3 fuel and gain +20 money.",
+					effect = function(updateResource)
 						updateResource("fuel", -3)
 						updateResource("money", 20)
 					end,
@@ -357,14 +384,16 @@ M.NODE_OPTIONS = {
 			characterImage = "alien2.png",
 		},
 	},
+
 	[M.NODE_TYPES.EmptySpace] = {
 		{
 			type = M.NODE_TYPES.EmptySpace,
 			handler = DefaultNodeHandler,
-			question = "You are in empty space. Nothing happens.",
+			question = "You drift through empty space. Nothing of note.",
 			choices = {
 				{
 					text = "Continue",
+					description = "No effect.",
 					effect = function()
 						print("Continuing through empty space.")
 					end,
@@ -374,20 +403,23 @@ M.NODE_OPTIONS = {
 			characterImage = "alien2.png",
 		},
 	},
+
 	[M.NODE_TYPES.Story] = {
 		{
 			type = M.NODE_TYPES.Story,
 			handler = DefaultNodeHandler,
-			question = "You receive a distress signal from a nearby planet. Do you want to investigate?",
+			question = "A distress signal echoes from a nearby planet.",
 			choices = {
 				{
-					text = "Yes",
+					text = "Investigate",
+					description = "Gain +1 signal.",
 					effect = function(updateResource)
 						updateResource("signals", 1)
 					end,
 				},
 				{
-					text = "No",
+					text = "Ignore",
+					description = "No effect.",
 					effect = function()
 						print("Ignored distress signal")
 					end,

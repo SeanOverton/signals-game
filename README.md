@@ -15,12 +15,11 @@ https://github.com/mtanksl/LOVELi
 - Finish: passengers and empty nodes first, with UI, done
 - Main menu, done
 - More art assets for more nodes, generally update UI. more passegers
-
-- Then:
 - refactor nodes to be more extensible, use object... kinda?
 - refactor ship
 - UI for ship, done
 - Implement story, created custscenes to some extent? can add more here
+
 - make decisions more visible, see effects with overlay
 - make nodes generally more interesting, see gpt response -> delay, animate some effects
 - Implement shop, and other node types

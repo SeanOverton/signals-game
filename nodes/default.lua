@@ -1,6 +1,6 @@
 local DefaultNodeHandler = {
 	buttons = {},
-	load = function(self, CurrentNode)
+	load = function(self, CurrentNode, modal)
 		self.buttons = {}
 		-- configure buttons from the choices
 		for i, choice in ipairs(CurrentNode.choices) do
@@ -16,6 +16,40 @@ local DefaultNodeHandler = {
 				{ showBorder = true }
 			)
 			table.insert(self.buttons, newButton)
+			if choice.description then
+				local infoButton = Button:new(
+					love.graphics.getWidth() / 2 - (200 * #CurrentNode.choices / 2) - 30 + (i - 1) * 250,
+					500,
+					"i",
+					20,
+					function()
+						print(choice.description)
+						modal:open(function()
+							local FULL_SIZE = 300
+
+							local largeFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 48)
+							love.graphics.setFont(largeFont)
+
+							love.graphics.printf(
+								"Effects:",
+								love.graphics.getWidth() / 2 - FULL_SIZE / 2,
+								love.graphics.getHeight() / 2 - 40,
+								FULL_SIZE,
+								"center"
+							)
+							love.graphics.printf(
+								choice.description,
+								love.graphics.getWidth() / 2 - FULL_SIZE / 2,
+								love.graphics.getHeight() / 2,
+								FULL_SIZE,
+								"center"
+							)
+						end)
+					end,
+					{ showBorder = true }
+				)
+				table.insert(self.buttons, infoButton)
+			end
 		end
 	end,
 	update = function(self, dt, _)

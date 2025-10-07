@@ -358,7 +358,7 @@ function love.update(dt)
 		if PreviousNode == nil then
 			CurrentNode = getRandomNode()
 			PreviousNode = CurrentNode
-			CurrentNode.handler:load(CurrentNode)
+			CurrentNode.handler:load(CurrentNode, modal)
 		end
 
 		if Resources.fuel <= 0 then
@@ -536,7 +536,7 @@ function handleNavigateToNewNode(direction)
 	if not CurrentNode or CurrentNode.handler == nil then
 		return
 	end
-	CurrentNode.handler:load(CurrentNode)
+	CurrentNode.handler:load(CurrentNode, modal)
 end
 
 function drawMinimap()
