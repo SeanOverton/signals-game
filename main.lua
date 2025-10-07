@@ -8,6 +8,8 @@ local Button = require("./button")
 local Modal = require("./modal")
 local modal = nil
 local Rocket = require("./rocket")
+local PassengersMenu = require("./passengersMenu")
+local WinImage = require("./winImage")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -130,25 +132,38 @@ function love.load()
 	resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
 
 	Rocket:load()
+	WinImage:load()
+	PassengersMenu:load(passengers)
 
 	-- loads once at start of game, setup game, and init/load assets etc.
 	-- create new menu
 	local layoutmanager = {
 		buttons = {
-			Button:new(love.graphics.getWidth() / 2 - 70, love.graphics.getHeight() / 2, "New game", 40, function()
+			Button:new(love.graphics.getWidth() / 2 - 80, love.graphics.getHeight() / 2, "New game", 40, function()
 				if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 					resetGame()
 					Menu.navController:navigateTo(types.GameStateType.Gameplay)
 				end
 			end, { showBorder = true }),
 			Button:new(
-				love.graphics.getWidth() / 2 - 70,
-				love.graphics.getHeight() / 2 + 100,
+				love.graphics.getWidth() / 2 - 75,
+				love.graphics.getHeight() / 2 + 80,
 				"Continue",
 				40,
 				function()
 					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 						Menu.navController:navigateTo(types.GameStateType.Gameplay)
+					end
+				end
+			),
+			Button:new(
+				love.graphics.getWidth() / 2 - 90,
+				love.graphics.getHeight() / 2 + 145,
+				"Passengers",
+				40,
+				function()
+					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
+						Menu.navController:navigateTo(types.GameStateType.Passengers)
 					end
 				end
 			),
@@ -182,6 +197,7 @@ function love.load()
 
 	Menu.layoutmanager = layoutmanager
 	Menu.navController = navController
+	-- initial gamestate
 	GameState = types.GameStateType.Menu
 end
 
@@ -199,22 +215,6 @@ local CurrentPassengers = {
 	buttons = {},
 	update = function(self, dt)
 		self.buttons = {}
-		-- configure buttons from the choices
-
-		-- love.graphics.printf(
-		-- 	"i",
-		-- 	love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10) + SIZE - 17,
-		-- 	13,
-		-- 	5,
-		-- 	"center"
-		-- )
-		-- love.graphics.circle(
-		-- 	"line",
-		-- 	love.graphics.getWidth() / 2 - (PlayerShip.MAX_PASSENGERS * SIZE) / 2 + (i - 1) * (SIZE + 10) + SIZE - 15,
-		-- 	25,
-		-- 	12,
-		-- 	12
-		-- )
 
 		for i, p in ipairs(PlayerPassengers) do
 			local newButton = Button:new(
@@ -341,6 +341,19 @@ function love.update(dt)
 	-- receives dt: deltatime arg, runs 60/ps, ie. every frame
 	if GameState == types.GameStateType.Menu then
 		Menu.layoutmanager:update(dt)
+	elseif GameState == types.GameStateType.Passengers then
+		if modal.active then
+			modal:update(dt)
+			return
+		end
+		PassengersMenu:update(dt)
+		if love.keyboard.isDown("escape") then
+			if Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.Menu)
+			else
+				print("NavController or navigateTo function not defined")
+			end
+		end
 	elseif GameState == types.GameStateType.Gameplay then
 		if PreviousNode == nil then
 			CurrentNode = getRandomNode()
@@ -365,11 +378,8 @@ function love.update(dt)
 			end
 			return
 		elseif Resources.signals >= constants.SIGNAL_TOTAL_GOAL then
-			print("You have collected enough signals! You win!")
 			if Menu.navController and Menu.navController.navigateTo then
 				Menu.navController:navigateTo(types.GameStateType.Win)
-			else
-				print("NavController or navigateTo function not defined")
 			end
 			return
 		end
@@ -410,7 +420,7 @@ function love.update(dt)
 		-- handle mouse click on choices
 		if not visited and CurrentNode then
 			local mx, my = love.mouse.getPosition()
-			CurrentNode.handler:update(dt, eventManager)
+			CurrentNode.handler:update(dt, eventManager, PassengersMenu)
 		end
 
 		if love.keyboard.isDown("escape") then
@@ -482,6 +492,7 @@ function love.update(dt)
 			handleNavigateToNewNode({ x = 0, y = -1 })
 		end
 	elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
+		WinImage:update(dt)
 		if love.keyboard.isDown("escape") then
 			if Menu.navController and Menu.navController.navigateTo then
 				Menu.navController:navigateTo(types.GameStateType.Menu)
@@ -692,13 +703,12 @@ function love.draw()
 	-- update UI, drawing elements etc. after update runs
 	-- runs after every love.update
 	if GameState == types.GameStateType.Win then
-		love.graphics.clear(0, 0.5, 0, 1)
+		WinImage:draw()
 		love.graphics.setColor(1, 1, 1, 1)
-		love.graphics.printf("You Win!", 0, love.graphics.getHeight() / 2 - 50, love.graphics.getWidth(), "center")
 		love.graphics.printf(
 			"Press ESC to return to Menu",
 			0,
-			love.graphics.getHeight() / 2 + 10,
+			love.graphics.getHeight() - 60,
 			love.graphics.getWidth(),
 			"center"
 		)
@@ -715,6 +725,20 @@ function love.draw()
 		)
 	elseif GameState == types.GameStateType.Menu then
 		Menu.layoutmanager:draw()
+	elseif GameState == types.GameStateType.Passengers then
+		PassengersMenu:draw()
+
+		local smallFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 24)
+		love.graphics.setFont(smallFont)
+
+		love.graphics.printf(
+			"Press ESC to return to Menu",
+			0,
+			love.graphics.getHeight() - 20,
+			love.graphics.getWidth(),
+			"center"
+		)
+		modal:draw()
 	elseif GameState == types.GameStateType.Gameplay then
 		love.graphics.clear(0, 0, 0, 1)
 

@@ -50,9 +50,10 @@ end
 
 function registerAnimations(eventManager, animationSystem)
 	eventManager.on("fuelUpdated", getResourceAnimation(animationSystem, "fuelUpdated", 100, 40))
-	eventManager.on("moneyUpdated", getResourceAnimation(animationSystem, "moneyUpdated", 100, 80))
-	eventManager.on("oxygenUpdated", getResourceAnimation(animationSystem, "oxygenUpdated", 100, 120))
-	eventManager.on("signalsUpdated", getResourceAnimation(animationSystem, "signalUpdated", 100, 160))
+	eventManager.on("oxygenUpdated", getResourceAnimation(animationSystem, "oxygenUpdated", 100, 80))
+	eventManager.on("moneyUpdated", getResourceAnimation(animationSystem, "moneyUpdated", 100, 120))
+	eventManager.on("hullUpdated", getResourceAnimation(animationSystem, "hullUpdated", 100, 160))
+	eventManager.on("signalsUpdated", getResourceAnimation(animationSystem, "signalUpdated", 100, 200))
 end
 
 M.registerResourceAnimations = registerAnimations
