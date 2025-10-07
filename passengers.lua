@@ -73,6 +73,28 @@ local OxygenSniffer = Passenger:new("Oxygen Sniffer", "oxygenSniffer.png", "visi
 	Resources.oxygen = Resources.oxygen + 1
 end, "Visiting a Resource node grants +1 Oxygen.")
 
+local Peach = Passenger:new("Peach", "assets/peach.png", "move", function()
+	Resources.money = Resources.money + 2
+end, "+2 money on every move")
+
+local SpaceSlimy = Passenger:new("Space Slimy", "assets/snail.png", "move", function(index)
+	if index % 2 == 0 then
+		Resources.money = Resources.money - 1
+	else
+		Resources.fuel = Resources.fuel + 1
+	end
+end, "Alternates on each move -1 Money and +1 Fuel")
+
+local VomitBob = Passenger:new("Vomit Bob", "assets/flubber.png", "move", function(index)
+	Resources.hull = Resources.hull - 1
+	Resources.money = Resources.money - 1
+	Resources.fuel = Resources.fuel - 1
+	local outcome = math.random()
+	if outcome < 0.1 then
+		Resources.signals = Resources.signals + 5
+	end
+end, "-1 on hull, money, fuel on every move BUT 10% chance of +5 signal")
+
 --export out public components ie. the actual passengers
 local M = {
 	Trader,
@@ -86,6 +108,9 @@ local M = {
 	BreatherFungus,
 	Stargazer,
 	OxygenSniffer,
+	Peach,
+	SpaceSlimy,
+	VomitBob,
 }
 
 return M

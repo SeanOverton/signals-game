@@ -67,7 +67,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "alien.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 			handler = DefaultNodeHandler,
 		},
 	},
@@ -76,7 +76,7 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.Passenger,
 			question = "You encounter two aliens seeking passage. Let one on board?",
-			characterImage = "alien.png",
+			characterImage = "assets/spaceGuy.png",
 			description = "Choosing a passenger grants unique bonuses or penalties during travel.",
 			handler = PassengerNodeHandler,
 		},
@@ -111,7 +111,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "dryPlanet.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 		{
 			type = M.NODE_TYPES.Anomaly,
@@ -135,7 +135,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "dryPlanet.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 		{
 			handler = DefaultNodeHandler,
@@ -164,7 +164,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "dryPlanet.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 		{
 			handler = DefaultNodeHandler,
@@ -195,7 +195,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "dryPlanet.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 	},
 
@@ -238,7 +238,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "planet.png",
-			characterImage = "alien.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 		{
 			type = M.NODE_TYPES.Combat,
@@ -262,7 +262,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "planet.png",
-			characterImage = "alien.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 		{
 			type = M.NODE_TYPES.Combat,
@@ -298,7 +298,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "planet.png",
-			characterImage = "alien.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 	},
 
@@ -329,7 +329,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "satellite.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 		{
 			type = M.NODE_TYPES.ResourceFind,
@@ -357,7 +357,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "satellite.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 		{
 			type = M.NODE_TYPES.ResourceFind,
@@ -382,7 +382,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "satellite.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 	},
 
@@ -401,7 +401,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "emptySpace.png",
-			characterImage = "alien2.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 	},
 
@@ -427,7 +427,7 @@ M.NODE_OPTIONS = {
 				},
 			},
 			image = "planet.png",
-			characterImage = "alien.png",
+			characterImage = "assets/spaceGuy.png",
 		},
 	},
 }
