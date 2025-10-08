@@ -132,8 +132,6 @@ function love.load()
 	-- init
 	modal = Modal:new()
 
-	resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
-
 	Rocket:load()
 	WinImage:load()
 	PassengersMenu:load(passengers)
@@ -145,6 +143,7 @@ function love.load()
 			Button:new(love.graphics.getWidth() / 2 - 80, love.graphics.getHeight() / 2, "New game", 40, function()
 				if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 					resetGame()
+					resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
 					audioManager.play("menuClick")
 					Menu.navController:navigateTo(types.GameStateType.Gameplay)
 				end
