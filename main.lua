@@ -3,6 +3,7 @@ local constants = require("./constants")
 local eventManager = require("./eventManager")
 local passengers = require("./passengers")
 local animationSystem = require("./animationSystem")
+local audioManager = require("./audio/audioManager")
 local resourceAnimations = require("./animation")
 local Button = require("./button")
 local Modal = require("./modal")
@@ -91,7 +92,9 @@ function resetGame()
 	Moving = false
 	PlayerPassengers = {}
 end
-
+function getNodeType()
+  local type = constants.NODE_TYPES.Passenger
+end
 function getRandomNodeType()
 	local probabilityTable = constants.Probabilities[types.GameStateType.Gameplay]
 	local totalWeight = 0
@@ -199,6 +202,29 @@ function love.load()
 	Menu.navController = navController
 	-- initial gamestate
 	GameState = types.GameStateType.Menu
+
+  -- Defining sound effects
+  local soundTable = {
+    menuClick = "audio/Menu Button Clicking Sound.wav",
+  }
+  
+  -- Defining music tracks
+  local musicTable = {
+    soundtrack1 = "audio/Soundtrack 1 - Night Across The Stars.wav",
+    soundtrack2 = "audio/Soundtrack 2 - Flashlight Evolving.wav",
+  }
+  
+  -- Loading audio
+  audioManager.load(soundTable)
+  audioManager.loadMusic(musicTable)
+  
+  -- Setting up continuous music playlist
+  audioManager.setContinuousPlaylist({"soundtrack1", "soundtrack2"})
+  audioManager.setWaitRange(10, 20)
+  audioManager.startContinuousMusic()
+   
+  -- Start playing menu music
+  audioManager.playMusic("soundtrack1")
 end
 
 function isPreviouslyVisited(x, y)
@@ -501,6 +527,20 @@ function love.update(dt)
 			end
 		end
 	end
+
+  audioManager.update(dt)
+end
+
+function love.mousepressed(x, y, button, istouch, presses)
+  if button == 1 then
+    audioManager.play("menuClick")
+  end
+end
+
+function love.mousepressed(x, y, button, istouch, presses)
+  if button == 1 then
+    audioManager.play("menuClick")
+  end
 end
 
 local moveCount = 0
