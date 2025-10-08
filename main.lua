@@ -95,10 +95,6 @@ function resetGame()
 	eventManager.reset()
 end
 
-function getNodeType()
-	local type = constants.NODE_TYPES.Passenger
-end
-
 function getRandomNodeType()
 	local probabilityTable = constants.Probabilities[types.GameStateType.Gameplay]
 	local totalWeight = 0
@@ -534,12 +530,6 @@ function love.update(dt)
 	end
 
 	audioManager.update(dt)
-end
-
-function love.mousepressed(x, y, button, istouch, presses)
-	if button == 1 then
-		audioManager.play("click")
-	end
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
