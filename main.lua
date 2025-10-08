@@ -145,6 +145,7 @@ function love.load()
 			Button:new(love.graphics.getWidth() / 2 - 80, love.graphics.getHeight() / 2, "New game", 40, function()
 				if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 					resetGame()
+          audioManager.play("menuClick")
 					Menu.navController:navigateTo(types.GameStateType.Gameplay)
 				end
 			end, { showBorder = true }),
@@ -155,7 +156,8 @@ function love.load()
 				40,
 				function()
 					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
-						Menu.navController:navigateTo(types.GameStateType.Gameplay)
+						audioManager.play("menuClick")
+            Menu.navController:navigateTo(types.GameStateType.Gameplay)
 					end
 				end
 			),
@@ -166,7 +168,8 @@ function love.load()
 				40,
 				function()
 					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
-						Menu.navController:navigateTo(types.GameStateType.Passengers)
+						audioManager.play("menuClick")
+            Menu.navController:navigateTo(types.GameStateType.Passengers)
 					end
 				end
 			),
@@ -205,7 +208,8 @@ function love.load()
 
   -- Defining sound effects
   local soundTable = {
-    menuClick = "audio/Menu Button Clicking Sound.wav",
+    click = "audio/Clicking.wav",
+    menuClick = "audio/Menu Button Clicking.wav",
   }
   
   -- Defining music tracks
@@ -219,12 +223,9 @@ function love.load()
   audioManager.loadMusic(musicTable)
   
   -- Setting up continuous music playlist
-  audioManager.setContinuousPlaylist({"soundtrack1", "soundtrack2"})
+  audioManager.setContinuousPlaylist({"soundtrack1", "soundtrack2"}, true)
   audioManager.setWaitRange(10, 20)
   audioManager.startContinuousMusic()
-   
-  -- Start playing menu music
-  audioManager.playMusic("soundtrack1")
 end
 
 function isPreviouslyVisited(x, y)
@@ -533,13 +534,13 @@ end
 
 function love.mousepressed(x, y, button, istouch, presses)
   if button == 1 then
-    audioManager.play("menuClick")
+    audioManager.play("click")
   end
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
   if button == 1 then
-    audioManager.play("menuClick")
+    audioManager.play("click")
   end
 end
 

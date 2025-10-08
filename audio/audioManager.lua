@@ -24,7 +24,9 @@ function audioManager.loadMusic(musicTable)
   end
 end
 
-function audioManager.setContinuousPlaylist(trackNames)
+local repeatPlaylist = false
+
+function audioManager.setContinuousPlaylist(trackNames, repeatOpt)
   musicQueue = {}
   for _, name in ipairs(trackNames) do
     if musics[name] then
@@ -34,6 +36,7 @@ function audioManager.setContinuousPlaylist(trackNames)
   currentMusicIndex = 1
   isWaiting = false
   waitTimer = 0
+  repeatPlaylist = repeatOpt or false
 end
 
 function audioManager.startContinuousMusic()
@@ -46,12 +49,17 @@ function audioManager.stopContinuousMusic()
   musicQueue = {}
   isWaiting = false
   waitTimer = 0
+  repeatPlaylist = false
   audioManager.stopMusic()
 end
 
 function audioManager.setWaitRange(min, max)
   minWait = min
   maxWait = max
+end
+
+function audioManager.setRepeatPlaylist(repeatOpt)
+  repeatPlaylist = repeatOpt
 end
 
 function audioManager.update(dt)
@@ -63,7 +71,12 @@ function audioManager.update(dt)
         isWaiting = false
         currentMusicIndex = currentMusicIndex + 1
         if currentMusicIndex > #musicQueue then
-          currentMusicIndex = 1  -- Loop back to first track
+          if repeatPlaylist then
+            currentMusicIndex = 1  -- Loop back to first track
+          else
+            musicQueue = {} -- Stop playlist if not repeating
+            return
+          end
         end
         audioManager.playMusic(musicQueue[currentMusicIndex])
       end
