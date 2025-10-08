@@ -85,16 +85,20 @@ function resetGame()
 	Resources.fuel = constants.DEFAULT_RESOURCES.FUEL
 	Resources.oxygen = constants.DEFAULT_RESOURCES.OXYGEN
 	Resources.money = constants.DEFAULT_RESOURCES.MONEY
+	Resources.hull = constants.DEFAULT_RESOURCES.HULL
 	Resources.signals = constants.DEFAULT_RESOURCES.SIGNALS
 	PreviouslyVisitedCoords = {}
 	CurrentNode = nil
 	PreviousNode = nil
 	Moving = false
 	PlayerPassengers = {}
+	eventManager.reset()
 end
+
 function getNodeType()
-  local type = constants.NODE_TYPES.Passenger
+	local type = constants.NODE_TYPES.Passenger
 end
+
 function getRandomNodeType()
 	local probabilityTable = constants.Probabilities[types.GameStateType.Gameplay]
 	local totalWeight = 0
@@ -145,7 +149,7 @@ function love.load()
 			Button:new(love.graphics.getWidth() / 2 - 80, love.graphics.getHeight() / 2, "New game", 40, function()
 				if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 					resetGame()
-          audioManager.play("menuClick")
+					audioManager.play("menuClick")
 					Menu.navController:navigateTo(types.GameStateType.Gameplay)
 				end
 			end, { showBorder = true }),
@@ -157,7 +161,7 @@ function love.load()
 				function()
 					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 						audioManager.play("menuClick")
-            Menu.navController:navigateTo(types.GameStateType.Gameplay)
+						Menu.navController:navigateTo(types.GameStateType.Gameplay)
 					end
 				end
 			),
@@ -169,7 +173,7 @@ function love.load()
 				function()
 					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 						audioManager.play("menuClick")
-            Menu.navController:navigateTo(types.GameStateType.Passengers)
+						Menu.navController:navigateTo(types.GameStateType.Passengers)
 					end
 				end
 			),
@@ -206,26 +210,26 @@ function love.load()
 	-- initial gamestate
 	GameState = types.GameStateType.Menu
 
-  -- Defining sound effects
-  local soundTable = {
-    click = "audio/Clicking.wav",
-    menuClick = "audio/Menu Button Clicking.wav",
-  }
-  
-  -- Defining music tracks
-  local musicTable = {
-    soundtrack1 = "audio/Soundtrack 1 - Night Across The Stars.wav",
-    soundtrack2 = "audio/Soundtrack 2 - Flashlight Evolving.wav",
-  }
-  
-  -- Loading audio
-  audioManager.load(soundTable)
-  audioManager.loadMusic(musicTable)
-  
-  -- Setting up continuous music playlist
-  audioManager.setContinuousPlaylist({"soundtrack1", "soundtrack2"}, true)
-  audioManager.setWaitRange(10, 20)
-  audioManager.startContinuousMusic()
+	-- Defining sound effects
+	local soundTable = {
+		click = "audio/Clicking.wav",
+		menuClick = "audio/Menu Button Clicking.wav",
+	}
+
+	-- Defining music tracks
+	local musicTable = {
+		soundtrack1 = "audio/Soundtrack 1 - Night Across The Stars.wav",
+		soundtrack2 = "audio/Soundtrack 2 - Flashlight Evolving.wav",
+	}
+
+	-- Loading audio
+	audioManager.load(soundTable)
+	audioManager.loadMusic(musicTable)
+
+	-- Setting up continuous music playlist
+	audioManager.setContinuousPlaylist({ "soundtrack1", "soundtrack2" }, true)
+	audioManager.setWaitRange(10, 20)
+	audioManager.startContinuousMusic()
 end
 
 function isPreviouslyVisited(x, y)
@@ -529,19 +533,19 @@ function love.update(dt)
 		end
 	end
 
-  audioManager.update(dt)
+	audioManager.update(dt)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
-  if button == 1 then
-    audioManager.play("click")
-  end
+	if button == 1 then
+		audioManager.play("click")
+	end
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
-  if button == 1 then
-    audioManager.play("click")
-  end
+	if button == 1 then
+		audioManager.play("click")
+	end
 end
 
 local moveCount = 0
