@@ -11,6 +11,7 @@ local modal = nil
 local Rocket = require("./rocket")
 local PassengersMenu = require("./passengersMenu")
 local WinImage = require("./winImage")
+local ShipMenuButton = require("./shipMenuButton")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -135,6 +136,7 @@ function love.load()
 	Rocket:load()
 	WinImage:load()
 	PassengersMenu:load(passengers)
+	ShipMenuButton:load(modal, Rocket)
 
 	-- loads once at start of game, setup game, and init/load assets etc.
 	-- create new menu
@@ -414,9 +416,11 @@ function love.update(dt)
 			modal:update(dt)
 			return
 		end
+
 		CurrentPassengers:update(dt)
 		animationSystem:update(dt)
 		Rocket:update(dt)
+		ShipMenuButton:update(dt)
 
 		local PLANET_SPEED = 3
 
@@ -781,8 +785,13 @@ function love.draw()
 
 		drawSpaceBg()
 
+		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
 		love.graphics.print("Press ESC to return to Menu", 10, 10)
-		love.graphics.print("Use arrows to navigate", love.graphics.getWidth() / 2 - 50, love.graphics.getHeight() - 30)
+		love.graphics.print(
+			"Use arrows to navigate",
+			love.graphics.getWidth() / 2 - 100,
+			love.graphics.getHeight() - 30
+		)
 
 		drawMinimap()
 
@@ -803,6 +812,7 @@ function love.draw()
 		Rocket:draw()
 		drawCurrentNode()
 		animationSystem:draw()
+		ShipMenuButton:draw()
 		modal:draw()
 	end
 end

@@ -1,9 +1,52 @@
+local DEFAULT_IMAGE = nil
+local DEFAULT_NAME = "N/A"
+
 local Rocket = {
 	x = 400,
 	y = 300,
 	speed = 150,
 	animTimer = 0,
 	animFrame = 1,
+	upgradeMap = {},
+	upgradeOptions = {},
+	upgrades = {
+		Engine = {
+			type = "Engine",
+			name = DEFAULT_NAME,
+			image = DEFAULT_IMAGE,
+			unlocked = true,
+		},
+		Oxygen = {
+			type = "Oxygen",
+			name = DEFAULT_NAME,
+			image = DEFAULT_IMAGE,
+			unlocked = true,
+		},
+		Trade = {
+			type = "Trade",
+			name = DEFAULT_NAME,
+			image = DEFAULT_IMAGE,
+			unlocked = true,
+		},
+		Sensors = {
+			type = "Sensors",
+			name = DEFAULT_NAME,
+			image = DEFAULT_IMAGE,
+			unlocked = true,
+		},
+		Defense = {
+			type = "Defense",
+			name = DEFAULT_NAME,
+			image = DEFAULT_IMAGE,
+			unlocked = false,
+		},
+		Cosmetic = {
+			type = "Cosmetic",
+			name = DEFAULT_NAME,
+			image = DEFAULT_IMAGE,
+			unlocked = true,
+		},
+	},
 }
 
 function Rocket:load()
@@ -27,6 +70,19 @@ function Rocket:update(dt)
 		self.animFrame = 1
 		self.animTimer = 0
 	end
+end
+
+function Rocket:upgrade(type, newName)
+	local upgrade = self.upgradesMap[type][newName]
+	self.upgrades[type].name = upgrade.name
+	self.upgrades[type].image = upgrade.image
+
+	-- register effects as well similar to passengers?
+	-- or statically update values used in calcs
+end
+
+function Rocket:getUpgradeOptions()
+	return self.upgradeOptions
 end
 
 function Rocket:draw()
