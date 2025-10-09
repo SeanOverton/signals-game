@@ -1,6 +1,7 @@
 local types = require("./types/main")
 local PassengerNodeHandler = require("./nodes/passenger")
 local DefaultNodeHandler = require("./nodes/default")
+local ShopNodeHandler = require("./nodes/shop")
 
 local M = {}
 M.GAME_TITLE = "Signals"
@@ -44,31 +45,10 @@ M.NODE_OPTIONS = {
 	[M.NODE_TYPES.Shop] = {
 		{
 			type = M.NODE_TYPES.Shop,
-			question = "You encounter a space trader. Do you want to buy fuel?",
-			choices = {
-				{
-					text = "Trade",
-					description = "Spend 10 money to gain 20 fuel.",
-					effect = function(updateResource)
-						if Resources.money < 10 then
-							print("Not enough money to buy fuel.")
-							return
-						end
-						updateResource("money", -10)
-						updateResource("fuel", 20)
-					end,
-				},
-				{
-					text = "Skip",
-					description = "No effect. You ignore the trader.",
-					effect = function()
-						print("Ignored trader")
-					end,
-				},
-			},
-			image = "alien.png",
+			question = "You encounter a space trader.",
 			characterImage = "assets/spaceGuy.png",
-			handler = DefaultNodeHandler,
+			-- should also just have fuel and other needs for sale
+			handler = ShopNodeHandler,
 		},
 	},
 

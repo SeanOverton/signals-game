@@ -1,5 +1,43 @@
 local DEFAULT_IMAGE = nil
 local DEFAULT_NAME = "N/A"
+local DEFAULT_UPGRADE_STATE = {
+	Engine = {
+		type = "Engine",
+		name = DEFAULT_NAME,
+		image = DEFAULT_IMAGE,
+		unlocked = true,
+	},
+	Oxygen = {
+		type = "Oxygen",
+		name = DEFAULT_NAME,
+		image = DEFAULT_IMAGE,
+		unlocked = true,
+	},
+	Trade = {
+		type = "Trade",
+		name = DEFAULT_NAME,
+		image = DEFAULT_IMAGE,
+		unlocked = true,
+	},
+	Sensors = {
+		type = "Sensors",
+		name = DEFAULT_NAME,
+		image = DEFAULT_IMAGE,
+		unlocked = true,
+	},
+	Defense = {
+		type = "Defense",
+		name = DEFAULT_NAME,
+		image = DEFAULT_IMAGE,
+		unlocked = false,
+	},
+	Cosmetic = {
+		type = "Cosmetic",
+		name = DEFAULT_NAME,
+		image = DEFAULT_IMAGE,
+		unlocked = true,
+	},
+}
 
 local Rocket = {
 	x = 400,
@@ -8,45 +46,27 @@ local Rocket = {
 	animTimer = 0,
 	animFrame = 1,
 	upgradeMap = {},
-	upgradeOptions = {},
-	upgrades = {
-		Engine = {
+	upgradeOptions = {
+		{
 			type = "Engine",
-			name = DEFAULT_NAME,
-			image = DEFAULT_IMAGE,
-			unlocked = true,
+			name = "Fuel Injector",
+			image = "assets/fuelInjector.png",
+			cost = 5,
 		},
-		Oxygen = {
-			type = "Oxygen",
-			name = DEFAULT_NAME,
-			image = DEFAULT_IMAGE,
-			unlocked = true,
+		{
+			type = "Engine",
+			name = "Stabilizer",
+			cost = 15,
+			image = "assets/stabilizer.png",
 		},
-		Trade = {
-			type = "Trade",
-			name = DEFAULT_NAME,
-			image = DEFAULT_IMAGE,
-			unlocked = true,
-		},
-		Sensors = {
-			type = "Sensors",
-			name = DEFAULT_NAME,
-			image = DEFAULT_IMAGE,
-			unlocked = true,
-		},
-		Defense = {
-			type = "Defense",
-			name = DEFAULT_NAME,
-			image = DEFAULT_IMAGE,
-			unlocked = false,
-		},
-		Cosmetic = {
-			type = "Cosmetic",
-			name = DEFAULT_NAME,
-			image = DEFAULT_IMAGE,
-			unlocked = true,
+		{
+			type = "Engine",
+			name = "After burner",
+			cost = 20,
+			image = "assets/afterburner.png",
 		},
 	},
+	upgrades = DEFAULT_UPGRADE_STATE,
 }
 
 function Rocket:load()
@@ -72,17 +92,36 @@ function Rocket:update(dt)
 	end
 end
 
-function Rocket:upgrade(type, newName)
-	local upgrade = self.upgradesMap[type][newName]
-	self.upgrades[type].name = upgrade.name
-	self.upgrades[type].image = upgrade.image
+function Rocket:upgrade(upgradeObj)
+	updateResource("money", -upgradeObj.cost)
+	self.upgrades[upgradeObj.type].name = upgradeObj.name
+	self.upgrades[upgradeObj.type].image = upgradeObj.image
 
 	-- register effects as well similar to passengers?
 	-- or statically update values used in calcs
+	-- or just update resources, straight trade for resources
 end
 
-function Rocket:getUpgradeOptions()
-	return self.upgradeOptions
+function Rocket:reset()
+	self.upgrades = DEFAULT_UPGRADE_STATE
+end
+
+function Rocket:getRandomUpgradeOptions(number)
+	local randomUpgrades = {}
+	while #randomUpgrades < math.min(#self.upgradeOptions, number or 2) do
+		local candidate = self.upgradeOptions[math.random(1, #self.upgradeOptions)]
+		local alreadyChosen = false
+		for _, p in ipairs(randomUpgrades) do
+			if p.name == candidate.name then
+				alreadyChosen = true
+				break
+			end
+		end
+		if not alreadyChosen then
+			table.insert(randomUpgrades, candidate)
+		end
+	end
+	return randomUpgrades
 end
 
 function Rocket:draw()

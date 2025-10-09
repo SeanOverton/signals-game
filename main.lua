@@ -93,6 +93,7 @@ function resetGame()
 	PreviousNode = nil
 	Moving = false
 	PlayerPassengers = {}
+	Rocket:reset()
 	eventManager.reset()
 end
 
@@ -386,7 +387,7 @@ function love.update(dt)
 		if PreviousNode == nil then
 			CurrentNode = getRandomNode()
 			PreviousNode = CurrentNode
-			CurrentNode.handler:load(CurrentNode, modal)
+			CurrentNode.handler:load(CurrentNode, modal, Rocket)
 		end
 
 		if Resources.fuel <= 0 then
@@ -450,7 +451,7 @@ function love.update(dt)
 		-- handle mouse click on choices
 		if not visited and CurrentNode then
 			local mx, my = love.mouse.getPosition()
-			CurrentNode.handler:update(dt, eventManager, PassengersMenu)
+			CurrentNode.handler:update(dt, eventManager, PassengersMenu, Rocket)
 		end
 
 		if love.keyboard.isDown("escape") then
@@ -574,7 +575,7 @@ function handleNavigateToNewNode(direction)
 	if not CurrentNode or CurrentNode.handler == nil then
 		return
 	end
-	CurrentNode.handler:load(CurrentNode, modal)
+	CurrentNode.handler:load(CurrentNode, modal, Rocket)
 end
 
 function drawMinimap()
