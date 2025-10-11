@@ -29,12 +29,10 @@ function ShipMenuButton:load(modal, rocket)
 				local SIZE = 120
 
 				love.graphics.printf(upgrade.type .. ": " .. upgrade.name, px, py, 500, "left")
-				if upgrade.unlocked then
-					if upgrade.image then
-						local img = love.graphics.newImage(upgrade.image)
-						love.graphics.setColor(1, 1, 1, 1)
-						love.graphics.draw(img, px + 30, py + 30, 0, SIZE / img:getWidth(), SIZE / img:getHeight())
-					end
+				if upgrade.image then
+					local img = love.graphics.newImage(upgrade.image)
+					love.graphics.setColor(1, 1, 1, 1)
+					love.graphics.draw(img, px + 30, py + 30, 0, SIZE / img:getWidth(), SIZE / img:getHeight())
 				end
 
 				col = col + 1

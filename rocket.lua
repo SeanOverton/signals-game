@@ -5,37 +5,72 @@ local DEFAULT_UPGRADE_STATE = {
 		type = "Engine",
 		name = DEFAULT_NAME,
 		image = DEFAULT_IMAGE,
-		unlocked = true,
+		index = 0,
 	},
 	Oxygen = {
 		type = "Oxygen",
 		name = DEFAULT_NAME,
 		image = DEFAULT_IMAGE,
-		unlocked = true,
+		index = 0,
 	},
 	Trade = {
 		type = "Trade",
 		name = DEFAULT_NAME,
 		image = DEFAULT_IMAGE,
-		unlocked = true,
+		index = 0,
 	},
 	Sensors = {
 		type = "Sensors",
 		name = DEFAULT_NAME,
 		image = DEFAULT_IMAGE,
-		unlocked = true,
+		index = 0,
 	},
 	Defense = {
 		type = "Defense",
 		name = DEFAULT_NAME,
 		image = DEFAULT_IMAGE,
-		unlocked = false,
+		index = 0,
 	},
 	Cosmetic = {
 		type = "Cosmetic",
 		name = DEFAULT_NAME,
 		image = DEFAULT_IMAGE,
-		unlocked = true,
+		index = 0,
+	},
+}
+
+local Upgrades = {
+	Engine = {
+		chain = "Engine",
+		tiers = {
+			{
+				type = "Engine",
+				name = "Fuel Injector",
+				image = "assets/fuelInjector.png",
+				description = "Some effect",
+				cost = 5,
+				effect = function() end,
+				index = 1,
+			},
+			{
+				type = "Engine",
+				name = "Stabilizer",
+				cost = 15,
+				description = "Some effect",
+				effect = function() end,
+				image = "assets/stabilizer.png",
+				index = 2,
+			},
+			{
+				type = "Engine",
+				name = "After burner",
+				description = "Some effect",
+				effect = function() end,
+				cost = 20,
+				image = "assets/afterburner.png",
+				index = 3,
+			},
+		},
 	},
 }
 
@@ -46,26 +81,7 @@ local Rocket = {
 	animTimer = 0,
 	animFrame = 1,
 	upgradeMap = {},
-	upgradeOptions = {
-		{
-			type = "Engine",
-			name = "Fuel Injector",
-			image = "assets/fuelInjector.png",
-			cost = 5,
-		},
-		{
-			type = "Engine",
-			name = "Stabilizer",
-			cost = 15,
-			image = "assets/stabilizer.png",
-		},
-		{
-			type = "Engine",
-			name = "After burner",
-			cost = 20,
-			image = "assets/afterburner.png",
-		},
-	},
+	upgradeOptions = UpgradeOptions,
 	upgrades = DEFAULT_UPGRADE_STATE,
 }
 
@@ -93,10 +109,7 @@ function Rocket:update(dt)
 end
 
 function Rocket:upgrade(upgradeObj)
-	updateResource("money", -upgradeObj.cost)
-	self.upgrades[upgradeObj.type].name = upgradeObj.name
-	self.upgrades[upgradeObj.type].image = upgradeObj.image
-
+	self.upgrades[upgradeObj.type] = upgradeObj
 	-- register effects as well similar to passengers?
 	-- or statically update values used in calcs
 	-- or just update resources, straight trade for resources
@@ -106,22 +119,18 @@ function Rocket:reset()
 	self.upgrades = DEFAULT_UPGRADE_STATE
 end
 
-function Rocket:getRandomUpgradeOptions(number)
-	local randomUpgrades = {}
-	while #randomUpgrades < math.min(#self.upgradeOptions, number or 2) do
-		local candidate = self.upgradeOptions[math.random(1, #self.upgradeOptions)]
-		local alreadyChosen = false
-		for _, p in ipairs(randomUpgrades) do
-			if p.name == candidate.name then
-				alreadyChosen = true
-				break
-			end
-		end
-		if not alreadyChosen then
-			table.insert(randomUpgrades, candidate)
+function Rocket:getAvailableUpgrades()
+	local available = {}
+
+	for chainName, chain in pairs(Upgrades) do
+		local currentTier = self.upgrades[chainName].index or 0
+		local nextTier = chain.tiers[currentTier + 1]
+		if nextTier then
+			table.insert(available, nextTier)
 		end
 	end
-	return randomUpgrades
+
+	return available
 end
 
 function Rocket:draw()

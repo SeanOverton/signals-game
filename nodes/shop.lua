@@ -1,14 +1,53 @@
+local ShopProducts = {
+	{
+		type = "Shop",
+		name = "Fuel",
+		image = "assets/fuelInjector.png",
+		description = "+5 fuel",
+		cost = 5,
+		effect = function()
+			Resources.fuel = Resources.fuel + 5
+		end,
+	},
+}
+
 local ShopNodeHandler = {
 	randomUpgradeOptions = {},
 	BUTTON_SIZE_PIXELS = 240,
 	buttons = {},
+	genRandomItems = function(self, rocket)
+		local available = rocket:getAvailableUpgrades()
+
+		-- Append elements of list2 to list1
+		for _, value in ipairs(ShopProducts) do
+			table.insert(available, value)
+		end
+
+		local randomUpgrades = {}
+		while #randomUpgrades < math.min(#available, number or 2) do
+			local candidate = available[math.random(1, #available)]
+			local alreadyChosen = false
+			for _, p in ipairs(randomUpgrades) do
+				if p.name == candidate.name then
+					alreadyChosen = true
+					break
+				end
+			end
+			if not alreadyChosen then
+				table.insert(randomUpgrades, candidate)
+			end
+		end
+
+		self.randomUpgradeOptions = randomUpgrades
+	end,
 	load = function(self, _, _, rocket)
-		self.randomUpgradeOptions = rocket:getRandomUpgradeOptions()
+		self:genRandomItems(rocket)
+
 		self.buttons = {
 			Button:new(love.graphics.getWidth() / 2 - 175, 500, "Redraw (-10 money)", 24, function()
 				if Resources.money >= 10 then
 					updateResource("money", -10)
-					self.randomUpgradeOptions = rocket:getRandomUpgradeOptions()
+					self:genRandomItems(rocket)
 				end
 			end, { showBorder = true }),
 			Button:new(love.graphics.getWidth() / 2 + 75, 500, "Skip", 24, function()
@@ -36,7 +75,20 @@ local ShopNodeHandler = {
 					local w = self.BUTTON_SIZE_PIXELS
 					local h = self.BUTTON_SIZE_PIXELS
 					if mx >= x and mx <= x + w and my >= y and my <= y + h then
-						rocket:upgrade(upgrade)
+						if Resources.money < upgrade.cost then
+							return
+						end
+
+						updateResource("money", -upgrade.cost)
+						if upgrade.type ~= "Shop" then
+							-- only call upgrade for non shop items which are rocket upgrades
+							rocket:upgrade(upgrade)
+						end
+
+						if upgrade.effect then
+							upgrade.effect()
+						end
+
 						-- if passenger.register then
 						-- 	passenger:register(eventManager)
 						-- end
