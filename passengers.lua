@@ -26,6 +26,7 @@ end
 
 -- Trader passenger
 local Trader = Passenger:new("Trader", "alien2.png", "fuelUpdated", function()
+	-- trigger animation indicating passenger effect has been called
 	Resources.money = Resources.money + 1
 end, "Gains +1 Money whenever Fuel is updated.")
 
