@@ -95,17 +95,25 @@ function Rocket:load()
 end
 
 function Rocket:update(dt)
-	-- Only animate if moving
-	if Moving then
-		self.animTimer = self.animTimer + dt
-		if self.animTimer > 0.1 then
-			self.animTimer = 0
-			self.animFrame = self.animFrame % #self.imageMoving + 1
-		end
-	else
-		self.animFrame = 1
-		self.animTimer = 0
-	end
+  -- Only animate if moving
+  if Moving then
+    self.animTimer = self.animTimer + dt
+    if self.animTimer > 0.1 then
+      self.animTimer = 0
+      self.animFrame = self.animFrame % #self.imageMoving + 1
+    end
+    -- Play engine flare sound if not already playing
+    if not AudioManager.isPlaying("shipEngineFlare") then
+      AudioManager.play("shipEngineFlare")
+    end
+  else
+    self.animFrame = 1
+    self.animTimer = 0
+    -- Stop engine flare sound when not moving
+    if not AudioManager.isStopping("shipEngineFlare") then
+      AudioManager.stop("shipEngineFlare")
+    end
+  end
 end
 
 function Rocket:upgrade(upgradeObj)
