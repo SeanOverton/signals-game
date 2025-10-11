@@ -3,7 +3,7 @@ local constants = require("./constants")
 local eventManager = require("./eventManager")
 local passengers = require("./passengers")
 local animationSystem = require("./animationSystem")
-local audioManager = require("./audio/audioManager")
+AudioManager = require("./audio/audioManager")
 local resourceAnimations = require("./animation")
 local Button = require("./button")
 local Modal = require("./modal")
@@ -147,7 +147,7 @@ function love.load()
 				if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 					resetGame()
 					resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
-					audioManager.play("menuClick")
+					AudioManager.play("menuClick")
 					Menu.navController:navigateTo(types.GameStateType.Gameplay)
 				end
 			end, { showBorder = true }),
@@ -158,7 +158,7 @@ function love.load()
 				40,
 				function()
 					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
-						audioManager.play("menuClick")
+						AudioManager.play("menuClick")
 						Menu.navController:navigateTo(types.GameStateType.Gameplay)
 					end
 				end
@@ -170,7 +170,7 @@ function love.load()
 				40,
 				function()
 					if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
-						audioManager.play("menuClick")
+						AudioManager.play("menuClick")
 						Menu.navController:navigateTo(types.GameStateType.Passengers)
 					end
 				end
@@ -213,21 +213,35 @@ function love.load()
 		click = "audio/Clicking.wav",
 		menuClick = "audio/Menu Button Clicking.wav",
 	}
+  local dynamicsTable = {
+    shipEngineFlare = {
+      fadeIn = "audio/Engine Flare Fade In.wav",
+      loop = "audio/Engine Flare Loop.wav",
+      fadeOut = "audio/Engine Flare Fade Out.wav",
+      volume = 0.4,
+    },
+  }
 
 	-- Defining music tracks
 	local musicTable = {
 		soundtrack1 = "audio/Soundtrack 1 - Night Across The Stars.wav",
 		soundtrack2 = "audio/Soundtrack 2 - Flashlight Evolving.wav",
-	}
+    soundtrack3 = "audio/Soundtrack 3 - Space And Serenity.mp3",
+    soundtrack4 = "audio/Soundtrack 4 - Space Blueberry Picking.mp3",
+  }
 
 	-- Loading audio
-	audioManager.load(soundTable)
-	audioManager.loadMusic(musicTable)
+	AudioManager.load(soundTable, musicTable, dynamicsTable)
 
 	-- Setting up continuous music playlist
-	audioManager.setContinuousPlaylist({ "soundtrack1", "soundtrack2" }, true)
-	audioManager.setWaitRange(10, 20)
-	audioManager.startContinuousMusic()
+  local playlist = { "soundtrack1", "soundtrack2", "soundtrack3", "soundtrack4" }
+  for i = #playlist, 2, -1 do
+    local j = math.random(i)
+    playlist[i], playlist[j] = playlist[j], playlist[i]
+  end
+  AudioManager.setContinuousPlaylist(playlist, true)
+	AudioManager.setWaitRange(10, 20)
+	AudioManager.startContinuousMusic()
 end
 
 function isPreviouslyVisited(x, y)
@@ -366,6 +380,7 @@ local CurrentPassengers = {
 }
 
 function love.update(dt)
+  AudioManager.update(dt)
 	-- input handlng, game logic, calculations, updating positions etc.
 	-- receives dt: deltatime arg, runs 60/ps, ie. every frame
 	if GameState == types.GameStateType.Menu then
@@ -532,13 +547,11 @@ function love.update(dt)
 			end
 		end
 	end
-
-	audioManager.update(dt)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
 	if button == 1 then
-		audioManager.play("click")
+		AudioManager.play("click")
 	end
 end
 
@@ -715,7 +728,7 @@ function drawSpaceBg()
 	local bgTime = love.timer.getTime() * BG_ROTATION_SPEED
 	local bg
 	-- Safely attempt to load the background image
-	local success, imageOrError = pcall(love.graphics.newImage, "bg.png")
+	local success, imageOrError = pcall(love.graphics.newImage, "assets/bg.png")
 	if success then
 		bg = imageOrError
 	else
