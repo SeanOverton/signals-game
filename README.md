@@ -21,10 +21,11 @@ https://www.pixilart.com/draw
 - ~~refactor ship~~
 - ~~UI for ship, done~~
 - ~~Implement story, created custscenes to some extent? can add more here~~
-
-- Implement shop, and other node types
-- Implement ship upgrades (more effects on the situations)
+- ~~Implement shop, and other node types~~
+- ~~Implement ship upgrades (more effects on the situations)~~
     - animate these too
+
+- actually draw the rest of the shop items, upgrades
 - more cut-scenes (at start for more story/context)
 - make nodes generally more interesting, see gpt response -> delay, animate some effects
     - slow them down
