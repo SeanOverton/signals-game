@@ -5,7 +5,7 @@ local DefaultNodeHandler = {
 		-- configure buttons from the choices
 		for i, choice in ipairs(CurrentNode.choices) do
 			local newButton = Button:new(
-				love.graphics.getWidth() / 2 - (200 * #CurrentNode.choices / 2) + (i - 1) * 250,
+				love.graphics.getWidth() / 2 - (150 * #CurrentNode.choices / 2) + (i - 1) * 200,
 				500,
 				choice.text,
 				24,
@@ -18,7 +18,7 @@ local DefaultNodeHandler = {
 			table.insert(self.buttons, newButton)
 			if choice.description then
 				local infoButton = Button:new(
-					love.graphics.getWidth() / 2 - (200 * #CurrentNode.choices / 2) - 30 + (i - 1) * 250,
+					love.graphics.getWidth() / 2 - (150 * #CurrentNode.choices / 2) - 30 + (i - 1) * 200,
 					500,
 					"i",
 					20,

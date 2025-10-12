@@ -2,6 +2,7 @@ local types = require("./types/main")
 local PassengerNodeHandler = require("./nodes/passenger")
 local DefaultNodeHandler = require("./nodes/default")
 local ShopNodeHandler = require("./nodes/shop")
+local ResourceNodeHandler = require("./nodes/resource")
 
 local M = {}
 M.GAME_TITLE = "Signals"
@@ -285,7 +286,7 @@ M.NODE_OPTIONS = {
 	[M.NODE_TYPES.ResourceFind] = {
 		{
 			type = M.NODE_TYPES.ResourceFind,
-			handler = DefaultNodeHandler,
+			handler = ResourceNodeHandler,
 			question = "You find a derelict ship drifting nearby.",
 			choices = {
 				{
@@ -313,7 +314,7 @@ M.NODE_OPTIONS = {
 		},
 		{
 			type = M.NODE_TYPES.ResourceFind,
-			handler = DefaultNodeHandler,
+			handler = ResourceNodeHandler,
 			question = "A broken shuttle drifts in the void.",
 			choices = {
 				{
@@ -341,7 +342,7 @@ M.NODE_OPTIONS = {
 		},
 		{
 			type = M.NODE_TYPES.ResourceFind,
-			handler = DefaultNodeHandler,
+			handler = ResourceNodeHandler,
 			question = "Sensors detect an asteroid mine.",
 			choices = {
 				{
