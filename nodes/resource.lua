@@ -53,7 +53,7 @@ function ResourceNodeHandler:createSalvageButtons(modal)
 		end
 	end, { showBorder = true })
 
-	local stopButton = Button:new(love.graphics.getWidth() / 2 + 50, 500, "Stop & Leave", 24, function()
+	local stopButton = Button:new(love.graphics.getWidth() / 2 + 50, 500, "Leave with profit", 24, function()
 		self.state = "success"
 		self.message = string.format("You bank your haul safely. Recovered %d money.", self.collected)
 		updateResource("money", self.collected)

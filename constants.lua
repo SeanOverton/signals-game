@@ -3,6 +3,7 @@ local PassengerNodeHandler = require("./nodes/passenger")
 local DefaultNodeHandler = require("./nodes/default")
 local ShopNodeHandler = require("./nodes/shop")
 local ResourceNodeHandler = require("./nodes/resource")
+local CombatNodeHandler = require("./nodes/enemy")
 
 local M = {}
 M.GAME_TITLE = "Signals"
@@ -183,7 +184,7 @@ M.NODE_OPTIONS = {
 	[M.NODE_TYPES.Combat] = {
 		{
 			type = M.NODE_TYPES.Combat,
-			handler = DefaultNodeHandler,
+			handler = CombatNodeHandler,
 			question = "You encounter Scavenger raiders!",
 			choices = {
 				{
@@ -223,7 +224,7 @@ M.NODE_OPTIONS = {
 		},
 		{
 			type = M.NODE_TYPES.Combat,
-			handler = DefaultNodeHandler,
+			handler = CombatNodeHandler,
 			question = "You are ambushed by symbiotes!",
 			choices = {
 				{
@@ -247,7 +248,7 @@ M.NODE_OPTIONS = {
 		},
 		{
 			type = M.NODE_TYPES.Combat,
-			handler = DefaultNodeHandler,
+			handler = CombatNodeHandler,
 			question = "A space warlord blocks your trajectory...",
 			choices = {
 				{
