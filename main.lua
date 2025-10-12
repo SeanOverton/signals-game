@@ -12,6 +12,7 @@ local Rocket = require("./rocket")
 local PassengersMenu = require("./passengersMenu")
 local WinImage = require("./winImage")
 local ShipMenuButton = require("./shipMenuButton")
+local parallax = require("./parallax")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -37,6 +38,11 @@ PlayerPassengers = {}
 local PlayerPosition = { x = 0, y = 0 }
 local CurrentNode = nil
 local PreviouslyVisitedCoords = {}
+
+-- Smooth parallax movement variables
+local ParallaxPosition = { x = 0, y = 0 }
+local ParallaxVelocity = { x = 0.5, y = 0.3 } -- Drift speed
+local ParallaxTime = 0
 
 local Menu = {
 	navController = nil,
@@ -124,6 +130,8 @@ function getRandomNode()
 end
 
 function love.load()
+  parallax.load()
+
 	love.graphics.setDefaultFilter("nearest")
 	local navController = {
 		navigateTo = function(self, state)
@@ -229,6 +237,32 @@ function love.load()
 			volume = 0.5,
 		},
 	}
+  local dynamicsTable = {
+    shipEngineFlare = {
+      fadeIn = "audio/Engine Flare Fade In.wav",
+      loop = "audio/Engine Flare Loop.wav",
+      fadeOut = "audio/Engine Flare Fade Out.wav",
+      volume = 0.4,
+    },
+    muffledSpeaking = {
+      fadeInDuration = 0.2, 
+      loop = "audio/Muffled Speaking.wav",
+      fadeOutDuration = 0.2,
+      volume = 0.5,
+    },
+    muffledSpeaking2 = {
+      fadeInDuration = 0.2, 
+      loop = "audio/Muffled Speaking2.wav",
+      fadeOutDuration = 0.2,
+      volume = 0.5,
+    },
+    muffledSpeaking3 = {
+      fadeInDuration = 0.2, 
+      loop = "audio/Muffled Speaking3.wav",
+      fadeOutDuration = 0.2,
+      volume = 0.5,
+    },
+  }
 
 	-- Defining music tracks
 	local musicTable = {
@@ -392,6 +426,25 @@ local CurrentPassengers = {
 }
 function love.update(dt)
 	AudioManager.update(dt)
+
+  -- Update smooth parallax position with gentle drift
+  ParallaxTime = ParallaxTime + dt
+
+  -- If planet is moving, add extra parallax movement in the direction of travel
+  if Moving and Direction then
+    ParallaxPosition.x = ParallaxPosition.x + (ParallaxVelocity.x + -Direction.x * 2) * dt
+    ParallaxPosition.y = ParallaxPosition.y + (ParallaxVelocity.y + -Direction.y * 2) * dt
+  else
+    ParallaxPosition.x = ParallaxPosition.x + ParallaxVelocity.x * dt
+    ParallaxPosition.y = ParallaxPosition.y + ParallaxVelocity.y * dt
+  end
+
+  -- Add some subtle sine wave motion for more organic movement
+  local sineX = math.sin(ParallaxTime * 0.3) * 0.2
+  local sineY = math.cos(ParallaxTime * 0.4) * 0.15
+
+  parallax.update(dt, (ParallaxPosition.x + sineX)*100, (ParallaxPosition.y + sineY)*100)
+
 	-- input handlng, game logic, calculations, updating positions etc.
 	-- receives dt: deltatime arg, runs 60/ps, ie. every frame
 	if GameState == types.GameStateType.Menu then
@@ -509,16 +562,18 @@ function love.update(dt)
 			local wasWriting = love.update_writing_state.writing
 			local isWriting = charIndex < #CurrentNode.question
 
-			if not wasWriting and isWriting then
-				local wordCount = 0
-				for _ in string.gmatch(CurrentNode.question, "%S+") do
-					wordCount = wordCount + 1
-				end
-				local avgWordDuration = 0.2
-				local soundDuration = wordCount * avgWordDuration
-				AudioManager.play("muffledSpeaking", soundDuration)
-			end
-			love.update_writing_state.writing = isWriting
+      if not wasWriting and isWriting then
+        local wordCount = 0
+        for _ in string.gmatch(CurrentNode.question, "%S+") do
+          wordCount = wordCount + 1
+        end
+        local avgWordDuration = 0.2
+        local soundDuration = wordCount * avgWordDuration
+        local soundOptions = { "muffledSpeaking", "muffledSpeaking2", "muffledSpeaking3" }
+        local soundToPlay = soundOptions[math.random(1, #soundOptions)]
+        AudioManager.play(soundToPlay, soundDuration)
+      end
+      love.update_writing_state.writing = isWriting
 
 			if charIndex < #CurrentNode.question and timer >= typingSpeed then
 				charIndex = charIndex + 1
@@ -833,7 +888,7 @@ function love.draw()
 	elseif GameState == types.GameStateType.Gameplay then
 		love.graphics.clear(0, 0, 0, 1)
 
-		drawSpaceBg()
+    parallax.draw()
 
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
 		love.graphics.print("Press ESC for Menu", 10, 10)
