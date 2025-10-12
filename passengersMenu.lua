@@ -1,3 +1,5 @@
+local lume = require("lume")
+
 local Collectibles = {
 	passengers = {},
 	lockOverlay = nil,
@@ -12,16 +14,44 @@ local Collectibles = {
 	buttons = {},
 }
 
+local SAVE_FILE_NAME = "collectiblesSave.txt"
+
+function Collectibles:loadSave()
+	local data = {}
+	if love.filesystem.getInfo(SAVE_FILE_NAME) then
+		file = love.filesystem.read(SAVE_FILE_NAME)
+		data = lume.deserialize(file)
+		return data
+	end
+	return data
+end
+
+function Collectibles:save(data)
+	local simplified = {}
+
+	for _, p in ipairs(data) do
+		simplified[p.data.name] = p.unlocked
+	end
+	serialized = lume.serialize(simplified)
+
+	love.filesystem.write(SAVE_FILE_NAME, serialized)
+end
+
 function Collectibles:load(allPassengers)
 	self.lockOverlay = love.graphics.newImage("assets/lock.png")
 
+	local loadedPassengers = self.loadSave()
+
 	-- Initialize passengers
 	for _, passenger in ipairs(allPassengers) do
+		local saved = loadedPassengers[passenger.name]
+
 		self.passengers[#self.passengers + 1] = {
 			data = passenger,
-			unlocked = false,
+			unlocked = saved or false,
 		}
 	end
+
 	local screenWidth = love.graphics.getWidth()
 	local screenHeight = love.graphics.getHeight()
 
@@ -53,6 +83,7 @@ function Collectibles:unlock(passengerName)
 			break
 		end
 	end
+	Collectibles:save(self.passengers)
 end
 
 function Collectibles:hasUnlocked(passengerName)
