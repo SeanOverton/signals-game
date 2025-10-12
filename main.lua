@@ -329,6 +329,9 @@ local CurrentPassengers = {
 			b:draw()
 		end
 
+		local PASSENGER_BOB_SPEED = 7
+		local PASSENGER_BOB_OFFSET = 1
+		local time = math.sin(love.timer.getTime() * PASSENGER_BOB_SPEED) * PASSENGER_BOB_OFFSET
 		-- print current passengers at top middle of screen with names and images and empty slots
 		for i = 1, PlayerShip.MAX_PASSENGERS do
 			if PlayerPassengers[i] then
@@ -349,11 +352,12 @@ local CurrentPassengers = {
 						- (PlayerShip.MAX_PASSENGERS * self.SIZE) / 2
 						+ (i - 1) * (self.SIZE + 10)
 						+ 5,
-					15,
+					15 + (time + i * 3),
 					0,
 					(self.SIZE - 10) / img:getWidth(),
 					(self.SIZE - 10) / img:getHeight()
 				)
+				love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
 				love.graphics.printf(
 					passenger.name,
 					love.graphics.getWidth() / 2
@@ -655,14 +659,17 @@ function processDrawingNodeType(currentNode)
 	)
 	love.graphics.setColor(1, 1, 1, 1)
 
+	local CHARACTER_IMAGE_BOB_SPEED = 10
+	local CHARACTER_IMAGE_BOB_OFFSET = 2
 	-- depending on node type, draw different things
 	if currentNode.characterImage ~= nil then
 		local CHARACTER_TALKING_SIZE_PIXELS = 200
+		local time = math.sin(love.timer.getTime() * CHARACTER_IMAGE_BOB_SPEED) * CHARACTER_IMAGE_BOB_OFFSET
 		local characterTalking = love.graphics.newImage(currentNode.characterImage)
 		love.graphics.draw(
 			characterTalking,
 			10,
-			love.graphics.getHeight() - (CHARACTER_TALKING_SIZE_PIXELS + 10),
+			love.graphics.getHeight() - (CHARACTER_TALKING_SIZE_PIXELS + 10) + time,
 			0,
 			CHARACTER_TALKING_SIZE_PIXELS / characterTalking:getWidth(),
 			CHARACTER_TALKING_SIZE_PIXELS / characterTalking:getHeight()
