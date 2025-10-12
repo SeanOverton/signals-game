@@ -35,6 +35,7 @@ function Button:update(dt, mx, my, mousePressed)
 		self.font = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", self.baseFontSize * 1.2)
 		-- Only fire onClick on mouse press, not hold, and only once until mouse is released
 		if mousePressed and not self.wasMousePressed and self.onClick then
+      AudioManager.play("buttonClick")
 			self.onClick()
 		end
 	else

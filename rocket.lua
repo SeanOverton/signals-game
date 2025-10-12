@@ -1,5 +1,6 @@
 local DEFAULT_IMAGE = nil
 local DEFAULT_NAME = "N/A"
+
 local DEFAULT_UPGRADE_STATE = {
 	Engine = {
 		type = "Engine",
@@ -110,7 +111,7 @@ function Rocket:update(dt)
     self.animFrame = 1
     self.animTimer = 0
     -- Stop engine flare sound when not moving
-    if not AudioManager.isStopping("shipEngineFlare") then
+    if AudioManager.isPlaying("shipEngineFlare") and not AudioManager.isStopping("shipEngineFlare") then
       AudioManager.stop("shipEngineFlare")
     end
   end

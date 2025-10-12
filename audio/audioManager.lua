@@ -6,6 +6,7 @@ local sounds = {}
 local musics = {}
 local dynamicSounds = {}
 local activeDynamics = {}
+local soundTimers = {}
 
 local currentMusic = nil
 local musicQueue = {}
@@ -16,16 +17,28 @@ local minWait = 10  -- minimum wait time in seconds
 local maxWait = 20  -- maximum wait time in seconds
 
 function audioManager.load(soundTable, musicTable, dynamicsTable)
-  AudioManager.loadSound(soundTable)
-  AudioManager.loadMusic(musicTable)
-  for name, parts in pairs(dynamicsTable) do
-    AudioManager.loadDynamic(name, parts)
+  audioManager.loadSound(soundTable)
+  audioManager.loadMusic(musicTable)
+  if dynamicsTable then
+    for name, parts in pairs(dynamicsTable) do
+      audioManager.loadDynamic(name, parts)
+    end
   end
 end
 
 function audioManager.loadSound(soundTable)
   for name, path in pairs(soundTable) do
-    sounds[name] = love.audio.newSource(path, "static")
+    if not path.file then
+      sounds[name] = {
+        audio = love.audio.newSource(path, "static"),
+        volume = 1.0,
+      }
+    else
+      sounds[name] = {
+        audio = love.audio.newSource(path.file, "static"),
+        volume = path.volume or 1.0,
+      }
+    end
   end
 end
 
@@ -37,49 +50,44 @@ function audioManager.loadMusic(musicTable)
 end
 
 function audioManager.loadDynamic(name, parts)
-  dynamicSounds[name] = {
-    fadeIn = love.audio.newSource(parts.fadeIn, "static"),
+  local track = {
     loop = love.audio.newSource(parts.loop, "stream"),
-    fadeOut = love.audio.newSource(parts.fadeOut, "static"),
     state = "stopped",
     volume = parts.volume or 1.0,
+    fadeTimer = 0,
+    currentVolume = 0,
   }
-
-  dynamicSounds[name].loop:setLooping(true)
-end
-
-function audioManager.playDynamic(name)
-  local track = dynamicTracks[name]
-  if not track then return end
-
-  if currentDynamic and currentDynamic ~= track then
-    AudioManager.stopDynamic()
+  
+  track.loop:setLooping(true)
+  
+  -- Check if using audio file-based fades or duration-based fades
+  if parts.fadeIn then
+    -- Audio file-based fade in
+    track.fadeIn = love.audio.newSource(parts.fadeIn, "static")
+    track.useFadeInFile = true
+  elseif parts.fadeInDuration then
+    -- Duration-based fade in
+    track.fadeInDuration = parts.fadeInDuration
+    track.useFadeInFile = false
+  else
+    track.useFadeInFile = false
+    track.fadeInDuration = 0
   end
-
-  currentDynamic = track
-  track.fadeIn:setVolume(track.volume)
-  track.loop:setVolume(track.volume)
-  track.fadeOut:setVolume(track.volume)
-
-  track.state = "fadingIn"
-  track.fadeIn:stop()
-  track.fadeIn:play()
-end
-
--- 🆕 Stop dynamic track with fade out
-function audioManager.stopDynamic()
-  local track = currentDynamic
-  if not track or track.state == "stopped" then return end
-
-  if track.state == "looping" then
-    track.loop:stop()
-  elseif track.state == "fadingIn" then
-    track.fadeIn:stop()
+  
+  if parts.fadeOut then
+    -- Audio file-based fade out
+    track.fadeOut = love.audio.newSource(parts.fadeOut, "static")
+    track.useFadeOutFile = true
+  elseif parts.fadeOutDuration then
+    -- Duration-based fade out
+    track.fadeOutDuration = parts.fadeOutDuration
+    track.useFadeOutFile = false
+  else
+    track.useFadeOutFile = false
+    track.fadeOutDuration = 0
   end
-
-  track.state = "fadingOut"
-  track.fadeOut:stop()
-  track.fadeOut:play()
+  
+  dynamicSounds[name] = track
 end
 
 
@@ -100,7 +108,7 @@ end
 
 function audioManager.startContinuousMusic()
   if #musicQueue > 0 then
-    AudioManager.playMusic(musicQueue[currentMusicIndex])
+    audioManager.playMusic(musicQueue[currentMusicIndex])
   end
 end
 
@@ -109,7 +117,7 @@ function audioManager.stopContinuousMusic()
   isWaiting = false
   waitTimer = 0
   repeatPlaylist = false
-  AudioManager.stopMusic()
+  audioManager.stopMusic()
 end
 
 function audioManager.setWaitRange(min, max)
@@ -137,7 +145,7 @@ function audioManager.update(dt)
             return
           end
         end
-        AudioManager.playMusic(musicQueue[currentMusicIndex])
+        audioManager.playMusic(musicQueue[currentMusicIndex])
       end
     elseif currentMusic and not currentMusic:isPlaying() then
       -- Current track finished, start waiting period
@@ -147,43 +155,132 @@ function audioManager.update(dt)
     end
   end
 
+  -- Update sound timers
+  for name, timer in pairs(soundTimers) do
+    timer.elapsed = timer.elapsed + dt
+    if timer.elapsed >= timer.duration then
+      audioManager.stop(name)
+      soundTimers[name] = nil
+    end
+  end
+
+  -- Update dynamic sounds
   for name, d in pairs(activeDynamics) do
-    if d.state == "fadingIn" and not d.fadeIn:isPlaying() then
-      d.state = "looping"
-      d.loop:play()
-    elseif d.state == "looping" and not d.loop:isPlaying() then
-      d.loop:play()
-    elseif d.state == "fadingOut" and not d.fadeOut:isPlaying() then
-      d.state = "stopped"
-      activeDynamics[name] = nil
+    if d.state == "fadingIn" then
+      if d.useFadeInFile then
+        -- Audio file-based fade in
+        if not d.fadeIn:isPlaying() then
+          d.state = "looping"
+          d.loop:setVolume(d.volume)
+          d.loop:play()
+        end
+      else
+        -- Duration-based fade in
+        d.fadeTimer = d.fadeTimer + dt
+        if d.fadeInDuration > 0 then
+          d.currentVolume = math.min((d.fadeTimer / d.fadeInDuration) * d.volume, d.volume)
+          d.loop:setVolume(d.currentVolume)
+        else
+          d.currentVolume = d.volume
+          d.loop:setVolume(d.volume)
+        end
+        
+        if d.fadeTimer >= d.fadeInDuration then
+          d.state = "looping"
+          d.currentVolume = d.volume
+          d.loop:setVolume(d.volume)
+        end
+      end
+    elseif d.state == "looping" then
+      if not d.loop:isPlaying() then
+        d.loop:play()
+      end
+    elseif d.state == "fadingOut" then
+      if d.useFadeOutFile then
+        -- Audio file-based fade out
+        if not d.fadeOut:isPlaying() then
+          d.state = "stopped"
+          activeDynamics[name] = nil
+        end
+      else
+        -- Duration-based fade out
+        d.fadeTimer = d.fadeTimer + dt
+        if d.fadeOutDuration > 0 then
+          d.currentVolume = math.max(d.volume - (d.fadeTimer / d.fadeOutDuration) * d.volume, 0)
+          d.loop:setVolume(d.currentVolume)
+        else
+          d.currentVolume = 0
+          d.loop:setVolume(0)
+        end
+        
+        if d.fadeTimer >= d.fadeOutDuration then
+          d.loop:stop()
+          d.state = "stopped"
+          activeDynamics[name] = nil
+        end
+      end
     end
   end
 end
 
-function audioManager.play(name)
-    -- dynamic
+function audioManager.play(name, duration)
+  -- dynamic
   if dynamicSounds[name] then
     local d = dynamicSounds[name]
     if d.state ~= "stopped" then
-      AudioManager.stop(name)
+      audioManager.stop(name)
     end
     d.state = "fadingIn"
-    d.fadeIn:setVolume(d.volume)
-    d.loop:setVolume(d.volume)
-    d.fadeOut:setVolume(d.volume)
-    d.fadeIn:stop()
-    d.loop:stop()
-    d.fadeOut:stop()
-    d.fadeIn:play()
+    d.fadeTimer = 0
+    d.currentVolume = 0
+    
+    if d.useFadeInFile then
+      -- Audio file-based fade in
+      d.fadeIn:setVolume(d.volume)
+      d.loop:setVolume(d.volume)
+      d.fadeIn:stop()
+      d.loop:stop()
+      d.fadeIn:play()
+    else
+      -- Duration-based fade in
+      d.loop:setVolume(0)
+      d.loop:stop()
+      d.loop:play()
+    end
+    
+    if d.fadeOut then
+      d.fadeOut:setVolume(d.volume)
+      d.fadeOut:stop()
+    end
+    
     activeDynamics[name] = d
+    
+    -- Set up timer if duration is provided
+    if duration then
+      soundTimers[name] = {
+        duration = duration,
+        elapsed = 0
+      }
+    end
     return
   end
 
   -- regular
   local s = sounds[name]
   if s then
-    s:stop()
-    s:play()
+    s.audio:stop()
+    s.audio:play()
+    
+    -- Set up timer if duration is provided
+    if duration then
+      soundTimers[name] = {
+        duration = duration,
+        elapsed = 0
+      }
+    else
+      -- Clear any existing timer
+      soundTimers[name] = nil
+    end
   end
 end
 
@@ -194,33 +291,49 @@ function audioManager.playMusic(name)
   local music = musics[name]
   if music then
     currentMusic = music
+    currentMusic:setVolume(0.3)
     currentMusic:play()
   end
 end
 
 function audioManager.stop(name)
+  -- Clear timer if exists
+  soundTimers[name] = nil
+  
   -- dynamic?
   local d = dynamicSounds[name]
   if d and d.state ~= "stopped" then
-    if d.state == "fadingIn" then
-      d.fadeIn:stop()
-    elseif d.state == "looping" then
-      d.loop:stop()
-    end
-    if d.state == "fadingOut" and d.fadeOut:isPlaying() then
+    if d.state == "fadingOut" then
       -- Already fading out, do nothing
       return
     end
+    
     d.state = "fadingOut"
-    d.fadeOut:stop()
-    d.fadeOut:play()
+    d.fadeTimer = 0
+    
+    if d.useFadeOutFile then
+      -- Audio file-based fade out
+      if d.useFadeInFile and d.fadeIn:isPlaying() then
+        d.fadeIn:stop()
+      end
+      d.loop:stop()
+      d.fadeOut:stop()
+      d.fadeOut:play()
+    else
+      -- Duration-based fade out
+      d.currentVolume = d.loop:getVolume()
+      -- Loop continues playing but will fade out in update()
+    end
+    
     activeDynamics[name] = d
     return
   end
 
   -- regular
   local s = sounds[name]
-  if s then s:stop() end
+  if s then 
+    s.audio:stop() 
+  end
 end
 
 function audioManager.isStopping(name)
@@ -239,13 +352,17 @@ end
 
 function audioManager.setVolume(name, vol)
   if sounds[name] then
-    sounds[name]:setVolume(vol)
+    sounds[name].volume = vol
   elseif dynamicSounds[name] then
     local d = dynamicSounds[name]
     d.volume = vol
-    d.fadeIn:setVolume(vol)
+    if d.fadeIn then
+      d.fadeIn:setVolume(vol)
+    end
     d.loop:setVolume(vol)
-    d.fadeOut:setVolume(vol)
+    if d.fadeOut then
+      d.fadeOut:setVolume(vol)
+    end
   end
 end
 
@@ -258,7 +375,7 @@ end
 function audioManager.pause(name)
   local sound = sounds[name]
   if sound then
-    sound:pause()
+    sound.audio:pause()
   end
 end
 
@@ -271,7 +388,7 @@ end
 function audioManager.resume(name)
   local sound = sounds[name]
   if sound then
-    sound:play()
+    sound.audio:play()
   end
 end
 
@@ -285,9 +402,13 @@ function audioManager.isPlaying(name)
   local sound = sounds[name]
   local dynamic = dynamicSounds[name]
   if dynamic then
-    return dynamic.fadeIn:isPlaying() or dynamic.loop:isPlaying() or dynamic.fadeOut:isPlaying()
+    if dynamic.useFadeInFile then
+      return dynamic.fadeIn and dynamic.fadeIn:isPlaying() or dynamic.loop:isPlaying() or (dynamic.fadeOut and dynamic.fadeOut:isPlaying())
+    else
+      return dynamic.loop:isPlaying()
+    end
   end
-  return sound and sound:isPlaying()
+  return sound and sound.audio:isPlaying()
 end
 
 function audioManager.isMusicPlaying()
