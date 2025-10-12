@@ -146,6 +146,7 @@ function love.load()
 			Button:new(love.graphics.getWidth() / 2 - 80, love.graphics.getHeight() / 2, "New game", 40, function()
 				if love.mouse.isDown(1) and Menu.navController and Menu.navController.navigateTo then
 					resetGame()
+					ShipMenuButton:load(modal, Rocket)
 					resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
 					AudioManager.play("menuClick")
 					Menu.navController:navigateTo(types.GameStateType.Gameplay)
@@ -212,41 +213,41 @@ function love.load()
 	local soundTable = {
 		click = "audio/Clicking.wav",
 		menuClick = "audio/Menu Button Clicking.wav",
-    buttonClick = "audio/Menu Button Clicking.wav",
+		buttonClick = "audio/Menu Button Clicking.wav",
 	}
-  local dynamicsTable = {
-    shipEngineFlare = {
-      fadeIn = "audio/Engine Flare Fade In.wav",
-      loop = "audio/Engine Flare Loop.wav",
-      fadeOut = "audio/Engine Flare Fade Out.wav",
-      volume = 0.4,
-    },
-    muffledSpeaking = {
-      fadeInDuration = 0.2, 
-      loop = "audio/Muffled Speaking.wav",
-      fadeOutDuration = 0.2,
-      volume = 0.5,
-    },
-  }
+	local dynamicsTable = {
+		shipEngineFlare = {
+			fadeIn = "audio/Engine Flare Fade In.wav",
+			loop = "audio/Engine Flare Loop.wav",
+			fadeOut = "audio/Engine Flare Fade Out.wav",
+			volume = 0.4,
+		},
+		muffledSpeaking = {
+			fadeInDuration = 0.2,
+			loop = "audio/Muffled Speaking.wav",
+			fadeOutDuration = 0.2,
+			volume = 0.5,
+		},
+	}
 
 	-- Defining music tracks
 	local musicTable = {
 		soundtrack1 = "audio/Soundtrack 1 - Night Across The Stars.wav",
 		soundtrack2 = "audio/Soundtrack 2 - Flashlight Evolving.wav",
-    soundtrack3 = "audio/Soundtrack 3 - Space And Serenity.mp3",
-    soundtrack4 = "audio/Soundtrack 4 - Space Blueberry Picking.mp3",
-  }
+		soundtrack3 = "audio/Soundtrack 3 - Space And Serenity.mp3",
+		soundtrack4 = "audio/Soundtrack 4 - Space Blueberry Picking.mp3",
+	}
 
 	-- Loading audio
 	AudioManager.load(soundTable, musicTable, dynamicsTable)
 
 	-- Setting up continuous music playlist
-  local playlist = { "soundtrack1", "soundtrack2", "soundtrack3", "soundtrack4" }
-  for i = #playlist, 2, -1 do
-    local j = math.random(i)
-    playlist[i], playlist[j] = playlist[j], playlist[i]
-  end
-  AudioManager.setContinuousPlaylist(playlist, true)
+	local playlist = { "soundtrack1", "soundtrack2", "soundtrack3", "soundtrack4" }
+	for i = #playlist, 2, -1 do
+		local j = math.random(i)
+		playlist[i], playlist[j] = playlist[j], playlist[i]
+	end
+	AudioManager.setContinuousPlaylist(playlist, true)
 	AudioManager.setWaitRange(10, 20)
 	AudioManager.startContinuousMusic()
 end
@@ -386,195 +387,195 @@ local CurrentPassengers = {
 	end,
 }
 function love.update(dt)
-  AudioManager.update(dt)
-  -- input handlng, game logic, calculations, updating positions etc.
-  -- receives dt: deltatime arg, runs 60/ps, ie. every frame
-  if GameState == types.GameStateType.Menu then
-    Menu.layoutmanager:update(dt)
-  elseif GameState == types.GameStateType.Passengers then
-    if modal.active then
-      modal:update(dt)
-      return
-    end
-    PassengersMenu:update(dt)
-    if love.keyboard.isDown("escape") then
-      if Menu.navController and Menu.navController.navigateTo then
-        Menu.navController:navigateTo(types.GameStateType.Menu)
-      else
-        print("NavController or navigateTo function not defined")
-      end
-    end
-  elseif GameState == types.GameStateType.Gameplay then
-    if PreviousNode == nil then
-      CurrentNode = getRandomNode()
-      PreviousNode = CurrentNode
-      CurrentNode.handler:load(CurrentNode, modal, Rocket)
-    end
+	AudioManager.update(dt)
+	-- input handlng, game logic, calculations, updating positions etc.
+	-- receives dt: deltatime arg, runs 60/ps, ie. every frame
+	if GameState == types.GameStateType.Menu then
+		Menu.layoutmanager:update(dt)
+	elseif GameState == types.GameStateType.Passengers then
+		if modal.active then
+			modal:update(dt)
+			return
+		end
+		PassengersMenu:update(dt)
+		if love.keyboard.isDown("escape") then
+			if Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.Menu)
+			else
+				print("NavController or navigateTo function not defined")
+			end
+		end
+	elseif GameState == types.GameStateType.Gameplay then
+		if PreviousNode == nil then
+			CurrentNode = getRandomNode()
+			PreviousNode = CurrentNode
+			CurrentNode.handler:load(CurrentNode, modal, Rocket)
+		end
 
-    if Resources.fuel <= 0 then
-      print("Out of fuel! Game Over.")
-      if Menu.navController and Menu.navController.navigateTo then
-        Menu.navController:navigateTo(types.GameStateType.GameOver)
-      else
-        print("NavController or navigateTo function not defined")
-      end
-      return
-    elseif Resources.oxygen <= 0 then
-      print("Out of oxygen! Game Over.")
-      if Menu.navController and Menu.navController.navigateTo then
-        Menu.navController:navigateTo(types.GameStateType.GameOver)
-      else
-        print("NavController or navigateTo function not defined")
-      end
-      return
-    elseif Resources.signals >= constants.SIGNAL_TOTAL_GOAL then
-      if Menu.navController and Menu.navController.navigateTo then
-        Menu.navController:navigateTo(types.GameStateType.Win)
-      end
-      return
-    end
+		if Resources.fuel <= 0 then
+			print("Out of fuel! Game Over.")
+			if Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.GameOver)
+			else
+				print("NavController or navigateTo function not defined")
+			end
+			return
+		elseif Resources.oxygen <= 0 then
+			print("Out of oxygen! Game Over.")
+			if Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.GameOver)
+			else
+				print("NavController or navigateTo function not defined")
+			end
+			return
+		elseif Resources.signals >= constants.SIGNAL_TOTAL_GOAL then
+			if Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.Win)
+			end
+			return
+		end
 
-    if modal.active then
-      modal:update(dt)
-      return
-    end
+		if modal.active then
+			modal:update(dt)
+			return
+		end
 
-    CurrentPassengers:update(dt)
-    animationSystem:update(dt)
-    Rocket:update(dt)
-    ShipMenuButton:update(dt)
+		CurrentPassengers:update(dt)
+		animationSystem:update(dt)
+		Rocket:update(dt)
+		ShipMenuButton:update(dt)
 
-    local PLANET_SPEED = 3
+		local PLANET_SPEED = 3
 
-    if Moving then
-      -- update positions until new planet position reached and old one off screen
-      PrevPlanetPosition.x = PrevPlanetPosition.x
-        + (Direction.x * love.graphics.getWidth() - PrevPlanetPosition.x) * dt * PLANET_SPEED
-      PrevPlanetPosition.y = PrevPlanetPosition.y
-        + (Direction.y * love.graphics.getHeight() - PrevPlanetPosition.y) * dt * PLANET_SPEED
-      NewPlanetPosition.x = NewPlanetPosition.x
-        + (Direction.x * love.graphics.getWidth() - NewPlanetPosition.x) * dt * PLANET_SPEED
-      NewPlanetPosition.y = NewPlanetPosition.y
-        + (Direction.y * love.graphics.getHeight() - NewPlanetPosition.y) * dt * PLANET_SPEED
+		if Moving then
+			-- update positions until new planet position reached and old one off screen
+			PrevPlanetPosition.x = PrevPlanetPosition.x
+				+ (Direction.x * love.graphics.getWidth() - PrevPlanetPosition.x) * dt * PLANET_SPEED
+			PrevPlanetPosition.y = PrevPlanetPosition.y
+				+ (Direction.y * love.graphics.getHeight() - PrevPlanetPosition.y) * dt * PLANET_SPEED
+			NewPlanetPosition.x = NewPlanetPosition.x
+				+ (Direction.x * love.graphics.getWidth() - NewPlanetPosition.x) * dt * PLANET_SPEED
+			NewPlanetPosition.y = NewPlanetPosition.y
+				+ (Direction.y * love.graphics.getHeight() - NewPlanetPosition.y) * dt * PLANET_SPEED
 
-      -- once new planet at 0 and 0, stop moving
-      if math.abs(NewPlanetPosition.x) < 50 and math.abs(NewPlanetPosition.y) < 50 then
-        Moving = false
-        PrevPlanetPosition = { x = 0, y = 0 }
-        NewPlanetPosition = { x = 0, y = 0 }
-        Direction = nil
-      end
-      return
-    end
+			-- once new planet at 0 and 0, stop moving
+			if math.abs(NewPlanetPosition.x) < 50 and math.abs(NewPlanetPosition.y) < 50 then
+				Moving = false
+				PrevPlanetPosition = { x = 0, y = 0 }
+				NewPlanetPosition = { x = 0, y = 0 }
+				Direction = nil
+			end
+			return
+		end
 
-    local visited = isPreviouslyVisited(PlayerPosition.x, PlayerPosition.y)
+		local visited = isPreviouslyVisited(PlayerPosition.x, PlayerPosition.y)
 
-    -- handle mouse click on choices
-    if not visited and CurrentNode then
-      local mx, my = love.mouse.getPosition()
-      CurrentNode.handler:update(dt, eventManager, PassengersMenu, Rocket)
-    end
+		-- handle mouse click on choices
+		if not visited and CurrentNode then
+			local mx, my = love.mouse.getPosition()
+			CurrentNode.handler:update(dt, eventManager, PassengersMenu, Rocket)
+		end
 
-    if love.keyboard.isDown("escape") then
-      if Menu.navController and Menu.navController.navigateTo then
-        Menu.navController:navigateTo(types.GameStateType.Menu)
-      else
-        print("NavController or navigateTo function not defined")
-      end
-    end
+		if love.keyboard.isDown("escape") then
+			if Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.Menu)
+			else
+				print("NavController or navigateTo function not defined")
+			end
+		end
 
-    local visited = false
-    for _, coord in ipairs(PreviouslyVisitedCoords) do
-      if coord.x == PlayerPosition.x and coord.y == PlayerPosition.y then
-        visited = true
-        break
-      end
-    end
+		local visited = false
+		for _, coord in ipairs(PreviouslyVisitedCoords) do
+			if coord.x == PlayerPosition.x and coord.y == PlayerPosition.y then
+				visited = true
+				break
+			end
+		end
 
-    -- Track previous writing state for muffledSpeaking audio
-    if not love.update_writing_state then
-      love.update_writing_state = { writing = false }
-    end
+		-- Track previous writing state for muffledSpeaking audio
+		if not love.update_writing_state then
+			love.update_writing_state = { writing = false }
+		end
 
-    if CurrentNode and not visited then
-      -- typewriter effect for question
+		if CurrentNode and not visited then
+			-- typewriter effect for question
 
-      timer = timer + dt
+			timer = timer + dt
 
-      local wasWriting = love.update_writing_state.writing
-      local isWriting = charIndex < #CurrentNode.question
+			local wasWriting = love.update_writing_state.writing
+			local isWriting = charIndex < #CurrentNode.question
 
-      if not wasWriting and isWriting then
-        local wordCount = 0
-        for _ in string.gmatch(CurrentNode.question, "%S+") do
-          wordCount = wordCount + 1
-        end
-        local avgWordDuration = 0.2
-        local soundDuration = wordCount * avgWordDuration
-        AudioManager.play("muffledSpeaking", soundDuration)
-      end
-      love.update_writing_state.writing = isWriting
+			if not wasWriting and isWriting then
+				local wordCount = 0
+				for _ in string.gmatch(CurrentNode.question, "%S+") do
+					wordCount = wordCount + 1
+				end
+				local avgWordDuration = 0.2
+				local soundDuration = wordCount * avgWordDuration
+				AudioManager.play("muffledSpeaking", soundDuration)
+			end
+			love.update_writing_state.writing = isWriting
 
-      if charIndex < #CurrentNode.question and timer >= typingSpeed then
-        charIndex = charIndex + 1
-        displayedText = string.sub(CurrentNode.question, 1, charIndex)
-        timer = 0 -- Reset timer for the next character
-      end
+			if charIndex < #CurrentNode.question and timer >= typingSpeed then
+				charIndex = charIndex + 1
+				displayedText = string.sub(CurrentNode.question, 1, charIndex)
+				timer = 0 -- Reset timer for the next character
+			end
 
-      -- if at a node, do not allow movement until choice made
-      return
-    else
-      if love.update_writing_state and love.update_writing_state.writing then
-        love.update_writing_state.writing = false
-      end
-      charIndex = 0
-      displayedText = ""
-    end
+			-- if at a node, do not allow movement until choice made
+			return
+		else
+			if love.update_writing_state and love.update_writing_state.writing then
+				love.update_writing_state.writing = false
+			end
+			charIndex = 0
+			displayedText = ""
+		end
 
-    -- handle arrow key input
-    if love.keyboard.isDown("left") then
-      -- don't let players go beyond x=0 (starting line)
-      if PlayerPosition.x <= -constants.MAX_WIDTH / 2 then
-        return
-      end
+		-- handle arrow key input
+		if love.keyboard.isDown("left") then
+			-- don't let players go beyond x=0 (starting line)
+			if PlayerPosition.x <= -constants.MAX_WIDTH / 2 then
+				return
+			end
 
-      PlayerPosition.x = math.max(PlayerPosition.x - 1, -constants.MAX_WIDTH / 2)
-      handleNavigateToNewNode({ x = 1, y = 0 })
-    elseif love.keyboard.isDown("right") then
-      -- don't let players go beyond x=0 (starting line)
-      if PlayerPosition.x >= constants.MAX_WIDTH / 2 then
-        return
-      end
+			PlayerPosition.x = math.max(PlayerPosition.x - 1, -constants.MAX_WIDTH / 2)
+			handleNavigateToNewNode({ x = 1, y = 0 })
+		elseif love.keyboard.isDown("right") then
+			-- don't let players go beyond x=0 (starting line)
+			if PlayerPosition.x >= constants.MAX_WIDTH / 2 then
+				return
+			end
 
-      PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH / 2)
-      handleNavigateToNewNode({ x = -1, y = 0 })
-    elseif love.keyboard.isDown("up") then
-      -- don't let players go above y=0 (starting line)
-      if PlayerPosition.y <= -constants.MAX_WIDTH / 2 then
-        return
-      end
+			PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH / 2)
+			handleNavigateToNewNode({ x = -1, y = 0 })
+		elseif love.keyboard.isDown("up") then
+			-- don't let players go above y=0 (starting line)
+			if PlayerPosition.y <= -constants.MAX_WIDTH / 2 then
+				return
+			end
 
-      PlayerPosition.y = math.max(PlayerPosition.y - 1, -constants.MAX_WIDTH / 2)
-      handleNavigateToNewNode({ x = 0, y = 1 })
-    elseif love.keyboard.isDown("down") then
-      -- don't let players go below y=0 (starting line)
-      if PlayerPosition.y >= constants.MAX_WIDTH / 2 then
-        return
-      end
+			PlayerPosition.y = math.max(PlayerPosition.y - 1, -constants.MAX_WIDTH / 2)
+			handleNavigateToNewNode({ x = 0, y = 1 })
+		elseif love.keyboard.isDown("down") then
+			-- don't let players go below y=0 (starting line)
+			if PlayerPosition.y >= constants.MAX_WIDTH / 2 then
+				return
+			end
 
-      PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH / 2)
-      handleNavigateToNewNode({ x = 0, y = -1 })
-    end
-  elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
-    WinImage:update(dt)
-    if love.keyboard.isDown("escape") then
-      if Menu.navController and Menu.navController.navigateTo then
-        Menu.navController:navigateTo(types.GameStateType.Menu)
-      else
-        print("NavController or navigateTo function not defined")
-      end
-    end
-  end
+			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH / 2)
+			handleNavigateToNewNode({ x = 0, y = -1 })
+		end
+	elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
+		WinImage:update(dt)
+		if love.keyboard.isDown("escape") then
+			if Menu.navController and Menu.navController.navigateTo then
+				Menu.navController:navigateTo(types.GameStateType.Menu)
+			else
+				print("NavController or navigateTo function not defined")
+			end
+		end
+	end
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -789,7 +790,7 @@ function love.draw()
 		WinImage:draw()
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.printf(
-			"Press ESC to return to Menu",
+			"Press ESC for Menu",
 			0,
 			love.graphics.getHeight() - 60,
 			love.graphics.getWidth(),
@@ -800,7 +801,7 @@ function love.draw()
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.printf("Game Over!", 0, love.graphics.getHeight() / 2 - 50, love.graphics.getWidth(), "center")
 		love.graphics.printf(
-			"Press ESC to return to Menu",
+			"Press ESC for Menu",
 			0,
 			love.graphics.getHeight() / 2 + 10,
 			love.graphics.getWidth(),
@@ -815,7 +816,7 @@ function love.draw()
 		love.graphics.setFont(smallFont)
 
 		love.graphics.printf(
-			"Press ESC to return to Menu",
+			"Press ESC for Menu",
 			0,
 			love.graphics.getHeight() - 20,
 			love.graphics.getWidth(),
@@ -828,7 +829,7 @@ function love.draw()
 		drawSpaceBg()
 
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
-		love.graphics.print("Press ESC to return to Menu", 10, 10)
+		love.graphics.print("Press ESC for Menu", 10, 10)
 		love.graphics.print(
 			"Use arrows to navigate",
 			love.graphics.getWidth() / 2 - 100,

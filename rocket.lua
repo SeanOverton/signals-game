@@ -81,8 +81,6 @@ local Rocket = {
 	speed = 150,
 	animTimer = 0,
 	animFrame = 1,
-	upgradeMap = {},
-	upgradeOptions = UpgradeOptions,
 	upgrades = DEFAULT_UPGRADE_STATE,
 }
 
@@ -96,25 +94,25 @@ function Rocket:load()
 end
 
 function Rocket:update(dt)
-  -- Only animate if moving
-  if Moving then
-    self.animTimer = self.animTimer + dt
-    if self.animTimer > 0.1 then
-      self.animTimer = 0
-      self.animFrame = self.animFrame % #self.imageMoving + 1
-    end
-    -- Play engine flare sound if not already playing
-    if not AudioManager.isPlaying("shipEngineFlare") then
-      AudioManager.play("shipEngineFlare")
-    end
-  else
-    self.animFrame = 1
-    self.animTimer = 0
-    -- Stop engine flare sound when not moving
-    if AudioManager.isPlaying("shipEngineFlare") and not AudioManager.isStopping("shipEngineFlare") then
-      AudioManager.stop("shipEngineFlare")
-    end
-  end
+	-- Only animate if moving
+	if Moving then
+		self.animTimer = self.animTimer + dt
+		if self.animTimer > 0.1 then
+			self.animTimer = 0
+			self.animFrame = self.animFrame % #self.imageMoving + 1
+		end
+		-- Play engine flare sound if not already playing
+		if not AudioManager.isPlaying("shipEngineFlare") then
+			AudioManager.play("shipEngineFlare")
+		end
+	else
+		self.animFrame = 1
+		self.animTimer = 0
+		-- Stop engine flare sound when not moving
+		if AudioManager.isPlaying("shipEngineFlare") and not AudioManager.isStopping("shipEngineFlare") then
+			AudioManager.stop("shipEngineFlare")
+		end
+	end
 end
 
 function Rocket:upgrade(upgradeObj)
@@ -125,7 +123,16 @@ function Rocket:upgrade(upgradeObj)
 end
 
 function Rocket:reset()
-	self.upgrades = DEFAULT_UPGRADE_STATE
+	for key, value in pairs(self.upgrades) do
+		-- reset back to defaults...
+		-- can't just assign it because of assign by reference logic
+		-- of lua with tables
+		self.upgrades[key] = {}
+		self.upgrades[key].type = key
+		self.upgrades[key].name = DEFAULT_NAME
+		self.upgrades[key].image = DEFAULT_IMAGE
+		self.upgrades[key].index = 0
+	end
 end
 
 function Rocket:getAvailableUpgrades()
