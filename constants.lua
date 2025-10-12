@@ -31,7 +31,7 @@ M.NODE_TYPES = {
 M.Probabilities = {
 	[types.GameStateType.Gameplay] = {
 		{ type = M.NODE_TYPES.Passenger, weight = 10 },
-		{ type = M.NODE_TYPES.Shop, weight = 100 },
+		{ type = M.NODE_TYPES.Shop, weight = 10 },
 		{ type = M.NODE_TYPES.Anomaly, weight = 15 },
 		{ type = M.NODE_TYPES.Combat, weight = 10 },
 		{ type = M.NODE_TYPES.ResourceFind, weight = 20 },
