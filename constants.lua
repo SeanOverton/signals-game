@@ -373,7 +373,55 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.EmptySpace,
 			handler = DefaultNodeHandler,
-			question = "You drift through empty space. Nothing of note.",
+			question = "At least you’re not late for anything out here.",
+			choices = {
+				{
+					text = "Continue",
+					description = "No effect.",
+					effect = function()
+						print("Continuing through empty space.")
+					end,
+				},
+			},
+			image = "assets/emptySpace.png",
+			characterImage = "assets/spaceGuy.png",
+		},
+		{
+			type = M.NODE_TYPES.EmptySpace,
+			handler = DefaultNodeHandler,
+			question = "You hum to yourself. The stars hum back.",
+			choices = {
+				{
+					text = "Continue",
+					description = "No effect.",
+					effect = function()
+						print("Continuing through empty space.")
+					end,
+				},
+			},
+			image = "assets/emptySpace.png",
+			characterImage = "assets/spaceGuy.png",
+		},
+		{
+			type = M.NODE_TYPES.EmptySpace,
+			handler = DefaultNodeHandler,
+			question = "This part of the galaxy could really use a coffee shop.",
+			choices = {
+				{
+					text = "Continue",
+					description = "No effect.",
+					effect = function()
+						print("Continuing through empty space.")
+					end,
+				},
+			},
+			image = "assets/emptySpace.png",
+			characterImage = "assets/spaceGuy.png",
+		},
+		{
+			type = M.NODE_TYPES.EmptySpace,
+			handler = DefaultNodeHandler,
+			question = "The void stares back, unimpressed.",
 			choices = {
 				{
 					text = "Continue",

@@ -24,14 +24,18 @@ https://www.pixilart.com/draw
 - ~~Implement shop, and other node types~~
 - ~~Implement ship upgrades (more effects on the situations)~~
     - animate these too
-
-- actually draw the rest of the shop items, upgrades
-- more cut-scenes (at start for more story/context)
-- make nodes generally more interesting, see gpt response -> delay, animate some effects
-    - slow them down
+- ~~make nodes generally more interesting, see gpt response -> delay, animate some effects~~
+    - slow them down, kinda done
     - cut scenes -> space to continue, cut scene
+    - updated combat node, to have some real basic combat
+    - story can offer a bit more lore... interaction
+
+- marketing strategy -> pump out 3 content every day for 30 days
+- more art assets, alot more, keep them consistent pixels
+    - for all nodes, upgrades
+- more cut-scenes (at start for more story/context)
 - add more events to trigger effects of passengers, start animations
     - more animations in general
-- then just add more nodes and characters
-- runs
-- music/sound
+- then just add more nodes, characters, make the map scale out
+- more menu for signals/collectibles? settings?
+- runs/archetypes
