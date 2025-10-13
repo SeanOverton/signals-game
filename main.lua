@@ -120,8 +120,18 @@ function getRandomNodeType()
 	return constants.NODE_TYPES.EmptySpace -- fallback
 end
 
+StoryIndex = 0
+
 function getRandomNode()
 	local nodeType = getRandomNodeType()
+
+	-- sequential story nodes or not?
+	-- comment this out for random again
+	if nodeType == constants.NODE_TYPES.Story then
+		StoryIndex = math.min(StoryIndex + 1, #constants.NODE_OPTIONS[nodeType] + 1)
+		return constants.NODE_OPTIONS[nodeType][StoryIndex - 1]
+	end
+
 	local options = constants.NODE_OPTIONS[nodeType]
 	if not options or #options == 0 then
 		return nil
@@ -924,4 +934,3 @@ function love.draw()
 		modal:draw()
 	end
 end
-

@@ -4,6 +4,7 @@ local DefaultNodeHandler = require("./nodes/default")
 local ShopNodeHandler = require("./nodes/shop")
 local ResourceNodeHandler = require("./nodes/resource")
 local CombatNodeHandler = require("./nodes/enemy")
+local StoryNodeHandler = require("./nodes/story")
 
 local M = {}
 M.GAME_TITLE = "Signals"
@@ -388,28 +389,420 @@ M.NODE_OPTIONS = {
 	},
 
 	[M.NODE_TYPES.Story] = {
-		{
+		[0] = {
 			type = M.NODE_TYPES.Story,
-			handler = DefaultNodeHandler,
-			question = "A distress signal echoes from a nearby planet.",
-			choices = {
+			handler = StoryNodeHandler,
+			question = "Something faint hums through your comms...",
+			segments = {
 				{
-					text = "Investigate",
-					description = "Gain +1 signal.",
-					effect = function(updateResource)
-						updateResource("signals", 1)
-					end,
+					text = "You pick up a signal buried under static. Sounds like... someone trying to sing? Or cry? Hard to tell in space.",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Listen closer",
+							description = "You turn up the gain (and regret it instantly).",
+							effect = function()
+								return "next"
+							end,
+						},
+						{
+							text = "Ignore the noise",
+							description = "You've heard enough ghosts in the void.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								return "end"
+							end,
+						},
+					},
 				},
 				{
-					text = "Ignore",
-					description = "No effect.",
-					effect = function()
-						print("Ignored distress signal")
-					end,
+					text = "A cracked voice breaks through: '...hello? Anyone out there? We... may have made a small planet-sized mistake...'.",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Record transmission",
+							description = "You store the transmission. Could be worth something.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								return "end"
+							end,
+						},
+					},
 				},
 			},
 			image = "assets/planet.png",
 			characterImage = "assets/spaceGuy.png",
+		},
+
+		[1] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "Your ship's radio picks up an ancient jingle.",
+			segments = {
+				{
+					text = "'Buy one stardust smoothie, get the second free!' The ad's at least 400 years old.",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Sing along",
+							description = "It's catchy. Too catchy.",
+							effect = function()
+								return "next"
+							end,
+						},
+						{
+							text = "Mute it fast",
+							description = "You prefer silence over jingles from extinct smoothie chains.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								return "end"
+							end,
+						},
+					},
+				},
+				{
+					text = "Then - layered beneath the ad - a human distress call: 'Orion's Edge... survivors... bring the light... and smoothies if possible.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Add to signal log",
+							description = "Gain +1 signal.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+		},
+
+		[2] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "An alien podcast starts auto-playing on your ship.",
+			segments = {
+				{
+					text = "'Welcome back to *Intergalactic Gossip Hour*! Today's hot topic - humans: extinct or just lazy?'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Keep listening",
+							description = "You're mildly offended but also intrigued.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "One host says, 'I heard they once put cheese on everything.' The other gasps. 'Even *plants*?!'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Note cultural misunderstanding",
+							description = "Gain +1 signal. You chuckle quietly.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								if math.random() < 0.1 then
+									updateResource("money", 1)
+								end
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+		},
+
+		[3] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "A beacon drifts by - marked 'Project HALCYON.'",
+			segments = {
+				{
+					text = "A mechanical voice repeats, 'Please deposit your emotional baggage for re-entry clearance.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Deposit... something?",
+							description = "You toss in a half-eaten ration bar.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "The beacon hums. 'Emotional baggage accepted. You may proceed to heal.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Pat yourself on the back",
+							description = "You feel oddly lighter. Gain +1 signal.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								if math.random() < 0.1 then
+									updateResource("fuel", 1)
+								end
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+
+			[4] = {
+				type = M.NODE_TYPES.Story,
+				handler = StoryNodeHandler,
+				question = "Something is broadcasting old Earth music.",
+				segments = {
+					{
+						text = "'Sweet Home Alabama' drifts through the void. You can't help but wonder what Alabama was.",
+						image = "assets/planet.png",
+						choices = {
+							{
+								text = "Jam out",
+								description = "You tap your console like a drum.",
+								effect = function()
+									return "next"
+								end,
+							},
+						},
+					},
+					{
+						text = "After a long solo, a robotic voice says. 'This broadcast brought to you by... nobody. Everyone's gone.'",
+						image = "assets/planet.png",
+						choices = {
+							{
+								text = "Gain +1 signal",
+								description = "That's the most depressing encore ever.",
+								effect = function(updateResource)
+									updateResource("signals", 1)
+									return "end"
+								end,
+							},
+						},
+					},
+				},
+			},
+		},
+		[4] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "Something is broadcasting old Earth music.",
+			segments = {
+				{
+					text = "'Sweet Home Alabama' drifts through the void. You can't help but wonder what Alabama was.",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Jam out",
+							description = "You tap your console like a drum.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "After a long solo, a robotic voice says, 'This broadcast brought to you by... nobody. Everyone's gone.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Gain +1 signal",
+							description = "That’s the most depressing encore ever.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+		},
+		[5] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "Your onboard AI starts talking in its sleep.",
+			segments = {
+				{
+					text = "It mumbles something about 'saving the humans' and 'downloading a pizza recipe.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Let it finish its dream",
+							description = "You're not in the mood for digital therapy.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "It suddenly wakes and says, 'You heard that? Uh... diagnostic complete. Totally fine.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Pretend you didn't hear anything",
+							description = "Gain +1 signal. Maybe +1 trust issues.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								if math.random() < 0.1 then
+									updateResource("money", 1)
+								end
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+		},
+
+		[6] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "A transmission in an unknown language keeps repeating.",
+			segments = {
+				{
+					text = "Your translator attempts to decode: 'Greetings from the Council of Mildly Irritated Aliens.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Respond politely",
+							description = "Never anger the mildly irritated.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "Their reply: 'Apology accepted. Please stop crashing probes into our moons.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Log the diplomatic win",
+							description = "Gain +1 signal. Peace through confusion.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								if math.random() < 0.05 then
+									updateResource("hull", 1)
+								end
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+		},
+
+		[7] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "You find an alien influencer's abandoned vlog channel.",
+			segments = {
+				{
+					text = "'What's up starfolk! Today we're exploring abandoned human relics!' The screen shows... your ship?",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Subscribe",
+							description = "Support alien creators.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "'And that's how you hack their comms!' they cheer before the feed cuts out. Great.",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Gain +1 signal",
+							description = "You feel both violated and entertained.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+		},
+
+		[8] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "Your ship detects a billboard in space.",
+			segments = {
+				{
+					text = "'VISIT BEAUTIFUL ORION'S EDGE - NOW WITH 30% LESS COSMIC HORROR!'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Admire the marketing",
+							description = "Can't argue with honesty.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "Underneath the ad, faint distress pings echo - someone's still there.",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Mark the location",
+							description = "Gain +1 signal. And a weird urge to book a vacation.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								if math.random() < 0.1 then
+									updateResource("fuel", 1)
+								end
+								return "end"
+							end,
+						},
+					},
+				},
+			},
+		},
+
+		[9] = {
+			type = M.NODE_TYPES.Story,
+			handler = StoryNodeHandler,
+			question = "You reach the final broadcast.",
+			segments = {
+				{
+					text = "A calm voice: 'If you're hearing this... humanity made it through. Barely. Please don't mess it up again.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Send your own message back",
+							description = "Something uplifting, maybe.",
+							effect = function()
+								return "next"
+							end,
+						},
+					},
+				},
+				{
+					text = "You record: 'Still here. Still weird. Still exploring.' A pause. Then: 'Good enough. Welcome home, explorer.'",
+					image = "assets/planet.png",
+					choices = {
+						{
+							text = "Smile and drift on",
+							description = "Gain +1 signal. You’re part of the galaxy again.",
+							effect = function(updateResource)
+								updateResource("signals", 1)
+								return "end"
+							end,
+						},
+					},
+				},
+			},
 		},
 	},
 }
