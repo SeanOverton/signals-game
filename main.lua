@@ -101,6 +101,7 @@ function resetGame()
 	PlayerPassengers = {}
 	Rocket:reset()
 	eventManager.reset()
+	StoryIndex = 0
 end
 
 function getRandomNodeType()

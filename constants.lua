@@ -5,6 +5,7 @@ local ShopNodeHandler = require("./nodes/shop")
 local ResourceNodeHandler = require("./nodes/resource")
 local CombatNodeHandler = require("./nodes/enemy")
 local StoryNodeHandler = require("./nodes/story")
+local AnomalyNodeHandler = require("./nodes/anomaly")
 
 local M = {}
 M.GAME_TITLE = "Signals"
@@ -68,7 +69,7 @@ M.NODE_OPTIONS = {
 	[M.NODE_TYPES.Anomaly] = {
 		{
 			type = M.NODE_TYPES.Anomaly,
-			handler = DefaultNodeHandler,
+			handler = AnomalyNodeHandler,
 			question = "Spatial Rift detected ahead.",
 			choices = {
 				{
@@ -98,7 +99,7 @@ M.NODE_OPTIONS = {
 		},
 		{
 			type = M.NODE_TYPES.Anomaly,
-			handler = DefaultNodeHandler,
+			handler = AnomalyNodeHandler,
 			question = "Temporal echo... distorted signals nearby.",
 			choices = {
 				{
@@ -121,7 +122,7 @@ M.NODE_OPTIONS = {
 			characterImage = "assets/spaceGuy.png",
 		},
 		{
-			handler = DefaultNodeHandler,
+			handler = AnomalyNodeHandler,
 			type = M.NODE_TYPES.Anomaly,
 			question = "Quantum storm brewing ahead.",
 			choices = {
@@ -150,7 +151,7 @@ M.NODE_OPTIONS = {
 			characterImage = "assets/spaceGuy.png",
 		},
 		{
-			handler = DefaultNodeHandler,
+			handler = AnomalyNodeHandler,
 			type = M.NODE_TYPES.Anomaly,
 			question = "You're caught in a graviton well.",
 			choices = {
@@ -373,7 +374,7 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.EmptySpace,
 			handler = DefaultNodeHandler,
-			question = "At least you’re not late for anything out here.",
+			question = "At least you're not late for anything out here.",
 			choices = {
 				{
 					text = "Continue",
