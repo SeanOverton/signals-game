@@ -50,8 +50,14 @@ M.NODE_OPTIONS = {
 		{
 			type = M.NODE_TYPES.Shop,
 			question = "You encounter a space trader.",
-			characterImage = "assets/spaceGuy.png",
+			characterImage = "assets/alienGuy1.png",
 			-- should also just have fuel and other needs for sale
+			handler = ShopNodeHandler,
+		},
+		{
+			type = M.NODE_TYPES.Shop,
+			question = "A friendly robot offers you some goods.",
+			characterImage = "assets/robotGuy.png",
 			handler = ShopNodeHandler,
 		},
 	},

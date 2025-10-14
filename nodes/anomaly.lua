@@ -27,6 +27,7 @@ function AnomalyNodeHandler:load(CurrentNode, modal)
 		self.state = "investigating"
 		self.message = "You approach the rift... Space distorts around your ship."
 		self.timer = 0
+		self.buttons = {}
 	end, { showBorder = true })
 
 	local avoidButton = Button:new(love.graphics.getWidth() / 2 + 50, 500, "Avoid", 24, function()
