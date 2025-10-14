@@ -114,10 +114,10 @@ function AnomalyNodeHandler:draw()
 	local boxY = 320
 
 	love.graphics.setColor(0, 0, 0, 0.8)
-	love.graphics.rectangle("fill", boxX, boxY - 20, boxWidth, 120, 12, 12)
+	love.graphics.rectangle("fill", boxX, boxY - 20, boxWidth, 80, 12, 12)
 
 	love.graphics.setColor(1, 1, 1, 1)
-	love.graphics.printf(text, 0, boxY, love.graphics.getWidth(), "center")
+	love.graphics.printf(text, boxX, boxY, boxWidth, "center")
 
 	-- Buttons
 	for _, b in ipairs(self.buttons) do

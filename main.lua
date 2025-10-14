@@ -13,6 +13,7 @@ local PassengersMenu = require("./passengersMenu")
 local WinImage = require("./winImage")
 local ShipMenuButton = require("./shipMenuButton")
 local parallax = require("./parallax")
+local StartScene = require("./startScene")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -102,6 +103,7 @@ function resetGame()
 	Rocket:reset()
 	eventManager.reset()
 	StoryIndex = 0
+	StartScene:reset()
 end
 
 function getRandomNodeType()
@@ -158,6 +160,7 @@ function love.load()
 
 	Rocket:load()
 	WinImage:load()
+	StartScene:load(Menu)
 	PassengersMenu:load(passengers)
 	ShipMenuButton:load(modal, Rocket)
 
@@ -171,7 +174,7 @@ function love.load()
 					ShipMenuButton:load(modal, Rocket)
 					resourceAnimations.registerResourceAnimations(eventManager, animationSystem)
 					AudioManager.play("menuClick")
-					Menu.navController:navigateTo(types.GameStateType.Gameplay)
+					Menu.navController:navigateTo(types.GameStateType.Start)
 				end
 			end, { showBorder = true }),
 			Button:new(
@@ -639,6 +642,8 @@ function love.update(dt)
 			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH / 2)
 			handleNavigateToNewNode({ x = 0, y = -1 })
 		end
+	elseif GameState == types.GameStateType.Start then
+		StartScene:update(dt)
 	elseif GameState == types.GameStateType.Win or GameState == types.GameStateType.GameOver then
 		WinImage:update(dt)
 		if love.keyboard.isDown("escape") then
@@ -649,6 +654,10 @@ function love.update(dt)
 			end
 		end
 	end
+end
+
+function love.keypressed(key)
+	StartScene:keypressed(key)
 end
 
 function love.mousepressed(x, y, button, istouch, presses)
@@ -862,7 +871,9 @@ end
 function love.draw()
 	-- update UI, drawing elements etc. after update runs
 	-- runs after every love.update
-	if GameState == types.GameStateType.Win then
+	if GameState == types.GameStateType.Start then
+		StartScene:draw()
+	elseif GameState == types.GameStateType.Win then
 		WinImage:draw()
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.printf(
@@ -902,6 +913,7 @@ function love.draw()
 	elseif GameState == types.GameStateType.Gameplay then
 		love.graphics.clear(0, 0, 0, 1)
 
+		-- drawSpaceBg()
 		parallax.draw()
 
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))

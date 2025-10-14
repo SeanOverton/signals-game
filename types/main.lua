@@ -6,6 +6,7 @@ Types.GameStateType = {
 	Win = "win",
 	Passengers = "passengers",
 	GameOver = "gameover",
+	Start = "start",
 }
 
 return Types

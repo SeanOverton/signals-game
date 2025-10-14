@@ -31,6 +31,13 @@ https://www.pixilart.com/draw
     - story can offer a bit more lore... interaction
 
 - marketing strategy -> pump out 3 content every day for 30 days
+    - note: balatro took 2 years to build... and they had a demo/wishlist up
+    on steam for months. Earlier user feedback the better though
+    - I think initially the marketing content is to drive some interest
+    but also attract some loyal fans
+    - note the devs blog for reference: https://localthunk.com/blog/balatro-timeline-3aarh
+    - also this could be helpful as well https://howtomarketagame.com/
+
 - more art assets, alot more, keep them consistent pixels
     - for all nodes, upgrades
 - more cut-scenes (at start for more story/context)
@@ -38,4 +45,5 @@ https://www.pixilart.com/draw
     - more animations in general
 - then just add more nodes, characters, make the map scale out
 - more menu for signals/collectibles? settings?
+- tutorial
 - runs/archetypes
