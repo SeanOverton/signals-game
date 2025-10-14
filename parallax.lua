@@ -10,7 +10,7 @@ function parallax.load()
     { image = love.graphics.newImage("assets/space_background/prop-planet-small.png"), speed = 0.05, type = "random" },
     { image = love.graphics.newImage("assets/space_background/prop-planet-big.png"), speed = 0.08, type = "random" },
     { image = love.graphics.newImage("assets/space_background/asteroid-1.png"), speed = 0.1, type = "random" },
-    { image = love.graphics.newImage("assets/space_background/asteroid-2.png"), speed = 0.15, type = "random" },
+    { image = love.graphics.newImage("assets/space_background/asteroid-2.png"), speed = 0.3, type = "random" },
   }
 
   -- Pre-generate asteroid positions

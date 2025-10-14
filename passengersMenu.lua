@@ -60,12 +60,12 @@ function Collectibles:load(allPassengers)
 	local y = screenHeight - 80
 
 	self.buttons = {
-		Button:new(leftX, y + 8, "<", 40, function()
+		UI.Button:new(leftX, y + 8, "<", 40, function()
 			if self.currentPage > 1 then
 				self.currentPage = self.currentPage - 1
 			end
 		end, { showBorder = true }),
-		Button:new(rightX, y + 8, ">", 40, function()
+		UI.Button:new(rightX, y + 8, ">", 40, function()
 			if self.currentPage < self.totalPages then
 				self.currentPage = self.currentPage + 1
 			end
