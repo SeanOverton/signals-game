@@ -38,6 +38,7 @@ https://www.pixilart.com/draw
     - note the devs blog for reference: https://localthunk.com/blog/balatro-timeline-3aarh
     - also this could be helpful as well https://howtomarketagame.com/
 
+- partial hints for each direction... to actually make the direction choice have value
 - more art assets, alot more, keep them consistent pixels
     - for all nodes, upgrades
 - more cut-scenes (at start for more story/context)

@@ -451,7 +451,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "You pick up a signal buried under static. Sounds like... someone trying to sing? Or cry? Hard to tell in space.",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Listen closer",
@@ -472,7 +472,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "A cracked voice breaks through: '...hello? Anyone out there? We... may have made a small planet-sized mistake...'.",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Record transmission",
@@ -485,7 +485,6 @@ M.NODE_OPTIONS = {
 					},
 				},
 			},
-			image = "assets/planet.png",
 			characterImage = "assets/spaceGuy.png",
 		},
 
@@ -496,7 +495,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "'Buy one stardust smoothie, get the second free!' The ad's at least 400 years old.",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Sing along",
@@ -517,7 +516,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "Then - layered beneath the ad - a human distress call: 'Orion's Edge... survivors... bring the light... and smoothies if possible.'",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Add to signal log",
@@ -539,7 +538,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "'Welcome back to *Intergalactic Gossip Hour*! Today's hot topic - humans: extinct or just lazy?'",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Keep listening",
@@ -552,7 +551,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "One host says, 'I heard they once put cheese on everything.' The other gasps. 'Even *plants*?!'",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Note cultural misunderstanding",
@@ -577,7 +576,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "A mechanical voice repeats, 'Please deposit your emotional baggage for re-entry clearance.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Deposit... something?",
@@ -590,7 +589,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "The beacon hums. 'Emotional baggage accepted. You may proceed to heal.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Pat yourself on the back",
@@ -614,7 +613,7 @@ M.NODE_OPTIONS = {
 				segments = {
 					{
 						text = "'Sweet Home Alabama' drifts through the void. You can't help but wonder what Alabama was.",
-						image = "assets/planet.png",
+						image = "assets/signal.png",
 						choices = {
 							{
 								text = "Jam out",
@@ -627,7 +626,7 @@ M.NODE_OPTIONS = {
 					},
 					{
 						text = "After a long solo, a robotic voice says. 'This broadcast brought to you by... nobody. Everyone's gone.'",
-						image = "assets/planet.png",
+						image = "assets/signal.png",
 						choices = {
 							{
 								text = "Gain +1 signal",
@@ -649,7 +648,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "'Sweet Home Alabama' drifts through the void. You can't help but wonder what Alabama was.",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Jam out",
@@ -662,7 +661,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "After a long solo, a robotic voice says, 'This broadcast brought to you by... nobody. Everyone's gone.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Gain +1 signal",
@@ -683,7 +682,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "It mumbles something about 'saving the humans' and 'downloading a pizza recipe.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Let it finish its dream",
@@ -696,7 +695,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "It suddenly wakes and says, 'You heard that? Uh... diagnostic complete. Totally fine.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Pretend you didn't hear anything",
@@ -721,7 +720,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "Your translator attempts to decode: 'Greetings from the Council of Mildly Irritated Aliens.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Respond politely",
@@ -734,7 +733,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "Their reply: 'Apology accepted. Please stop crashing probes into our moons.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Log the diplomatic win",
@@ -759,7 +758,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "'What's up starfolk! Today we're exploring abandoned human relics!' The screen shows... your ship?",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Subscribe",
@@ -772,7 +771,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "'And that's how you hack their comms!' they cheer before the feed cuts out. Great.",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Gain +1 signal",
@@ -794,7 +793,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "'VISIT BEAUTIFUL ORION'S EDGE - NOW WITH 30% LESS COSMIC HORROR!'",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Admire the marketing",
@@ -807,7 +806,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "Underneath the ad, faint distress pings echo - someone's still there.",
-					image = "assets/planet.png",
+					image = "assets/signal1.png",
 					choices = {
 						{
 							text = "Mark the location",
@@ -832,7 +831,7 @@ M.NODE_OPTIONS = {
 			segments = {
 				{
 					text = "A calm voice: 'If you're hearing this... humanity made it through. Barely. Please don't mess it up again.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Send your own message back",
@@ -845,7 +844,7 @@ M.NODE_OPTIONS = {
 				},
 				{
 					text = "You record: 'Still here. Still weird. Still exploring.' A pause. Then: 'Good enough. Welcome home, explorer.'",
-					image = "assets/planet.png",
+					image = "assets/signal.png",
 					choices = {
 						{
 							text = "Smile and drift on",

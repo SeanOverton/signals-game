@@ -78,7 +78,6 @@ local Upgrades = {
 local Rocket = {
 	x = 400,
 	y = 300,
-	speed = 150,
 	animTimer = 0,
 	animFrame = 1,
 	upgrades = DEFAULT_UPGRADE_STATE,

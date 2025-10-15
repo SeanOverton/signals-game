@@ -519,7 +519,8 @@ function love.update(dt)
 		Rocket:update(dt)
 		ShipMenuButton:update(dt)
 
-		local PLANET_SPEED = 3
+		-- this controls the pace of the game?
+		local PLANET_SPEED = 1.5
 
 		if Moving then
 			-- update positions until new planet position reached and old one off screen
