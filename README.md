@@ -29,8 +29,7 @@ https://www.pixilart.com/draw
     - cut scenes -> space to continue, cut scene
     - updated combat node, to have some real basic combat
     - story can offer a bit more lore... interaction
-
-- marketing strategy -> pump out 3 content every day for 30 days
+- marketing strategy -> pump out 3 content every day for 30 days (lets go for longer than this?)
     - note: balatro took 2 years to build... and they had a demo/wishlist up
     on steam for months. Earlier user feedback the better though
     - I think initially the marketing content is to drive some interest
@@ -38,7 +37,16 @@ https://www.pixilart.com/draw
     - note the devs blog for reference: https://localthunk.com/blog/balatro-timeline-3aarh
     - also this could be helpful as well https://howtomarketagame.com/
 
-- partial hints for each direction... to actually make the direction choice have value
+- improve whole world by generating it from seed up front:
+    - ✅ TL;DR — How to Make a Random World Feel Cohesive
+    - Pre-generate the map (fixed seed).
+    - Divide into regions, each with its own node biases.
+    - Use visual and narrative transitions between regions.
+    - Add clusters (micro-stories).
+    - Leave breadcrumbs or trails for navigation.
+    - Give ambient rules per region.
+    - Create a final goal (rescue beacon or signal source).
+    - partial hints for each direction... to actually make the direction choice have value
 - more art assets, alot more, keep them consistent pixels
     - for all nodes, upgrades
 - more cut-scenes (at start for more story/context)
@@ -48,3 +56,4 @@ https://www.pixilart.com/draw
 - more menu for signals/collectibles? settings?
 - tutorial
 - runs/archetypes
+- progressive universes
