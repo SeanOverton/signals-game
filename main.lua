@@ -14,6 +14,7 @@ local WinImage = require("./winImage")
 local ShipMenuButton = require("./shipMenuButton")
 local parallax = require("./parallax")
 local StartScene = require("./startScene")
+local GalaxyGenerator = require("./galaxyGenerator")
 
 local SETTINGS = {
 	-- @todo implement settings for speeds, volumes, difficulties etc.
@@ -36,7 +37,7 @@ Resources = {
 
 PlayerPassengers = {}
 -- more game state vars
-local PlayerPosition = { x = 0, y = 0 }
+local PlayerPosition = { x = 5, y = 5 }
 local CurrentNode = nil
 local PreviouslyVisitedCoords = {}
 
@@ -89,7 +90,7 @@ end
 function resetGame()
 	-- todo should force garbage collection of old nodes, passengers etc.
 	-- by adding reset function to each and calling it here?
-	PlayerPosition = { x = 0, y = 0 }
+	PlayerPosition = { x = 5, y = 5 }
 	Resources.fuel = constants.DEFAULT_RESOURCES.FUEL
 	Resources.oxygen = constants.DEFAULT_RESOURCES.OXYGEN
 	Resources.money = constants.DEFAULT_RESOURCES.MONEY
@@ -102,50 +103,74 @@ function resetGame()
 	PlayerPassengers = {}
 	Rocket:reset()
 	eventManager.reset()
-	StoryIndex = 0
+	GalaxyGenerator.storyIndex = 0
 	StartScene:reset()
 end
 
-function getRandomNodeType()
-	local probabilityTable = constants.Probabilities[types.GameStateType.Gameplay]
-	local totalWeight = 0
-	for _, option in ipairs(probabilityTable) do
-		totalWeight = totalWeight + option.weight
+local function drawHints(playerX, playerY, galaxy)
+	-- Early return if galaxy doesn’t exist
+	if not galaxy or not galaxy[playerY] or not galaxy[playerY][playerX] then
+		return
 	end
-	local rand = math.random() * totalWeight
-	local cumulativeWeight = 0
-	for _, option in ipairs(probabilityTable) do
-		cumulativeWeight = cumulativeWeight + option.weight
-		if rand <= cumulativeWeight then
-			return option.type
+
+	local directions = {
+		{ dx = 0, dy = -1, label = "Up", posX = love.graphics.getWidth() / 2, posY = 20 },
+		{ dx = 0, dy = 1, label = "Down", posX = love.graphics.getWidth() / 2, posY = love.graphics.getHeight() - 40 },
+		{ dx = -1, dy = 0, label = "Left", posX = 40, posY = love.graphics.getHeight() / 2 },
+		{ dx = 1, dy = 0, label = "Right", posX = love.graphics.getWidth() - 40, posY = love.graphics.getHeight() / 2 },
+	}
+
+	for _, dir in ipairs(directions) do
+		local nx, ny = playerX + dir.dx, playerY + dir.dy
+		local node = galaxy[ny] and galaxy[ny][nx]
+
+		if node then
+			-- load a tiny icon (optional: cache these elsewhere for perf)
+			local icon = nil
+			if node.image and love.filesystem.getInfo(node.image) then
+				icon = love.graphics.newImage(node.image)
+			end
+
+			local x = dir.posX
+			local y = dir.posY
+
+			-- translucent background
+			love.graphics.setColor(0, 0, 0, 0.6)
+			love.graphics.rectangle("fill", x - 40, y - 40, 80, 80, 12, 12)
+
+			-- draw icon if found
+			if icon then
+				love.graphics.setColor(1, 1, 1, 1)
+				local ox, oy = icon:getWidth() / 2, icon:getHeight() / 2
+				love.graphics.draw(icon, x, y - 10, 0, 0.25, 0.25, ox, oy)
+			end
+
+			-- text hint
+			love.graphics.setColor(1, 1, 1, 1)
+			love.graphics.setFont(love.graphics.newFont(16))
+			love.graphics.printf(node.type or "?", x - 50, y + 20, 150, "center")
+
+			-- optional directional label (Up, Down, etc.)
+			love.graphics.setColor(0.8, 0.8, 0.8, 0.6)
+			love.graphics.printf(dir.label, x - 50, y + 40, 100, "center")
 		end
 	end
-	return constants.NODE_TYPES.EmptySpace -- fallback
-end
-
-StoryIndex = 0
-
-function getRandomNode()
-	local nodeType = getRandomNodeType()
-
-	-- sequential story nodes or not?
-	-- comment this out for random again
-	if nodeType == constants.NODE_TYPES.Story then
-		StoryIndex = math.min(StoryIndex + 1, #constants.NODE_OPTIONS[nodeType] + 1)
-		return constants.NODE_OPTIONS[nodeType][StoryIndex - 1]
-	end
-
-	local options = constants.NODE_OPTIONS[nodeType]
-	if not options or #options == 0 then
-		return nil
-	end
-	return options[math.random(1, #options)]
 end
 
 function love.load()
+	math.randomseed(os.time())
+
+	GalaxyGrid = GalaxyGenerator.generateGalaxy(
+		constants.NODE_TYPES,
+		constants.Probabilities[types.GameStateType.Gameplay],
+		constants.NODE_OPTIONS,
+		10
+	)
+	-- for debugging
+	-- GalaxyGenerator.printGalaxy(GalaxyGrid)
+
 	-- we use the os time to seed the pseudo random
 	-- engine otherwise it becomes predictable
-	math.randomseed(os.time())
 	parallax.load()
 
 	love.graphics.setDefaultFilter("nearest")
@@ -481,7 +506,7 @@ function love.update(dt)
 		end
 	elseif GameState == types.GameStateType.Gameplay then
 		if PreviousNode == nil then
-			CurrentNode = getRandomNode()
+			CurrentNode = GalaxyGrid[PlayerPosition.y][PlayerPosition.x].config
 			PreviousNode = CurrentNode
 			CurrentNode.handler:load(CurrentNode, modal, Rocket)
 		end
@@ -612,35 +637,35 @@ function love.update(dt)
 		-- handle arrow key input
 		if love.keyboard.isDown("left") then
 			-- don't let players go beyond x=0 (starting line)
-			if PlayerPosition.x <= -constants.MAX_WIDTH / 2 then
+			if PlayerPosition.x <= 1 then
 				return
 			end
 
-			PlayerPosition.x = math.max(PlayerPosition.x - 1, -constants.MAX_WIDTH / 2)
+			PlayerPosition.x = math.max(PlayerPosition.x - 1, 1)
 			handleNavigateToNewNode({ x = 1, y = 0 })
 		elseif love.keyboard.isDown("right") then
 			-- don't let players go beyond x=0 (starting line)
-			if PlayerPosition.x >= constants.MAX_WIDTH / 2 then
+			if PlayerPosition.x >= constants.MAX_WIDTH then
 				return
 			end
 
-			PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH / 2)
+			PlayerPosition.x = math.min(PlayerPosition.x + 1, constants.MAX_WIDTH)
 			handleNavigateToNewNode({ x = -1, y = 0 })
 		elseif love.keyboard.isDown("up") then
 			-- don't let players go above y=0 (starting line)
-			if PlayerPosition.y <= -constants.MAX_WIDTH / 2 then
+			if PlayerPosition.y <= 1 then
 				return
 			end
 
-			PlayerPosition.y = math.max(PlayerPosition.y - 1, -constants.MAX_WIDTH / 2)
+			PlayerPosition.y = math.max(PlayerPosition.y - 1, 1)
 			handleNavigateToNewNode({ x = 0, y = 1 })
 		elseif love.keyboard.isDown("down") then
 			-- don't let players go below y=0 (starting line)
-			if PlayerPosition.y >= constants.MAX_WIDTH / 2 then
+			if PlayerPosition.y >= constants.MAX_WIDTH then
 				return
 			end
 
-			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH / 2)
+			PlayerPosition.y = math.min(PlayerPosition.y + 1, constants.MAX_WIDTH)
 			handleNavigateToNewNode({ x = 0, y = -1 })
 		end
 	elseif GameState == types.GameStateType.Start then
@@ -687,7 +712,7 @@ function handleNavigateToNewNode(direction)
 	if CurrentNode ~= nil then
 		PreviousNode = CurrentNode
 	end
-	CurrentNode = getRandomNode()
+	CurrentNode = GalaxyGrid[PlayerPosition.y][PlayerPosition.x].config
 	if CurrentNode and CurrentNode.type ~= nil then
 		local function capitalizeFirstLetter(str)
 			if not str or #str == 0 then
@@ -711,8 +736,8 @@ function drawMinimap()
 		love.graphics.setColor(0, 1, 0, 1)
 		love.graphics.circle(
 			"fill",
-			love.graphics.getWidth() - 60 + (coord.x * constants.PLAYER_RADIUS),
-			60 + (coord.y * constants.PLAYER_RADIUS),
+			love.graphics.getWidth() - 115 + (coord.x * constants.PLAYER_RADIUS),
+			5 + (coord.y * constants.PLAYER_RADIUS),
 			constants.PLAYER_RADIUS / 2
 		)
 		love.graphics.setColor(1, 1, 1, 1)
@@ -720,8 +745,8 @@ function drawMinimap()
 	-- mark current player position on minimap
 	love.graphics.circle(
 		"fill",
-		love.graphics.getWidth() - 60 + PlayerPosition.x * constants.PLAYER_RADIUS,
-		60 + PlayerPosition.y * constants.PLAYER_RADIUS,
+		love.graphics.getWidth() - 115 + PlayerPosition.x * constants.PLAYER_RADIUS,
+		5 + PlayerPosition.y * constants.PLAYER_RADIUS,
 		constants.PLAYER_RADIUS / 2
 	)
 end
@@ -945,6 +970,7 @@ function love.draw()
 		drawCurrentNode()
 		animationSystem:draw()
 		ShipMenuButton:draw()
+		drawHints(PlayerPosition.x, PlayerPosition.y, GalaxyGrid)
 		modal:draw()
 	end
 end
