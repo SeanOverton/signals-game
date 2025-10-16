@@ -77,7 +77,10 @@ function updateResource(resourceType, amount)
 		if Resources[resourceType] < 0 then
 			Resources[resourceType] = 0
 		end
-		eventManager.emit(resourceType .. "Updated", { amount = Resources[resourceType], change = amount })
+		eventManager.emit(
+			resourceType .. "Updated",
+			{ type = resourceType, amount = Resources[resourceType], change = amount }
+		)
 	else
 		print("Invalid resource type: " .. resourceType)
 	end
@@ -573,7 +576,7 @@ function love.update(dt)
 		-- handle mouse click on choices
 		if not visited and CurrentNode then
 			local mx, my = love.mouse.getPosition()
-			CurrentNode.handler:update(dt, eventManager, PassengersMenu, Rocket)
+			CurrentNode.handler:update(dt, eventManager, PassengersMenu, Rocket, animationSystem)
 		end
 
 		if love.keyboard.isDown("escape") then

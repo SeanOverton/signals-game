@@ -37,7 +37,7 @@ local PassengerNodeHandler = {
 			end, { showBorder = true }),
 		}
 	end,
-	update = function(self, dt, eventManager, passengersMenu)
+	update = function(self, dt, eventManager, passengersMenu, _, animationSystem)
 		local mx, my = love.mouse.getPosition()
 		local mousePressed = love.mouse.isDown(1)
 		for _, button in ipairs(self.buttons) do
@@ -68,7 +68,7 @@ local PassengerNodeHandler = {
 						table.insert(PlayerPassengers, passenger)
 						passengersMenu:unlock(passenger.name)
 						if passenger.register then
-							passenger:register(eventManager)
+							passenger:register(eventManager, animationSystem)
 						end
 						markNodeAsVisited()
 					end

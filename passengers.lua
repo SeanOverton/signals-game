@@ -1,3 +1,5 @@
+local Animation = require("./animation")
+
 Passenger = {}
 Passenger.__index = Passenger
 
@@ -16,8 +18,11 @@ function Passenger:new(name, image, effectTriggerEventName, effectCallback, effe
 	return obj
 end
 
-function Passenger:register(eventManager)
-	self.listenerRef = eventManager.on(self.triggerEvent, self.effectCallback)
+function Passenger:register(eventManager, animationSystem)
+	self.animationSystem = animationSystem
+	self.listenerRef = eventManager.on(self.triggerEvent, function(index)
+		self:effectCallback(index)
+	end)
 end
 
 function Passenger:deregister(eventManager)
@@ -38,7 +43,7 @@ local Explorer = Passenger:new("Explorer", "assets/alien2.png", "moneyUpdated", 
 	Resources.fuel = Resources.fuel + 1
 end, "Restores +1 Fuel whenever Money is updated.")
 
-local FuelEater = Passenger:new("Fuel Eater", "assets/fuelEater.png", "move", function(index)
+local FuelEater = Passenger:new("Fuel Eater", "assets/fuelEater.png", "move", function(self, index)
 	if index % 3 == 0 then
 		Resources.fuel = Resources.fuel + 1
 	end
@@ -60,7 +65,7 @@ local CosmicGambler = Passenger:new("Cosmic Gambler", "assets/cosmicGambler.png"
 	-- boost chance when gambling at the shops
 end, "Increases luck and rewards when gambling at shops.")
 
-local BreatherFungus = Passenger:new("Breather Fungus", "assets/mushroom.png", "move", function(index)
+local BreatherFungus = Passenger:new("Breather Fungus", "assets/mushroom.png", "move", function(self, index)
 	if index % 2 == 0 then
 		Resources.oxygen = Resources.oxygen + 1
 	end
@@ -78,38 +83,56 @@ local Peach = Passenger:new("Peach", "assets/peach.png", "move", function()
 	Resources.money = Resources.money + 2
 end, "+2 money on every move")
 
-local SpaceSlimy = Passenger:new("Space Slimy", "assets/snail.png", "move", function(index)
+local SpaceSlimy = Passenger:new("Space Slimy", "assets/snail.png", "move", function(self, index)
 	if index % 2 == 0 then
 		Resources.money = Resources.money - 1
+		self.animationSystem:enqueue(
+			Animation:new("moneyUpdated", "-1 Money", love.graphics.getWidth() / 2 - 50, 50, { 1, 0, 0 })
+		)
 	else
 		Resources.fuel = Resources.fuel + 1
+		self.animationSystem:enqueue(
+			Animation:new("fuelUpdated", "+1 Fuel", love.graphics.getWidth() / 2 - 50, 50, { 0, 1, 0 })
+		)
 	end
 end, "Alternates on each move -1 Money and +1 Fuel")
 
-local VomitBob = Passenger:new("Vomit Bob", "assets/flubber.png", "move", function(index)
+local VomitBob = Passenger:new("Vomit Bob", "assets/flubber.png", "move", function(self, index)
 	Resources.hull = Resources.hull - 1
+	self.animationSystem:enqueue(
+		Animation:new("hullUpdated", "-1 Hull", love.graphics.getWidth() / 2 - 100, 100, { 1, 0, 0 })
+	)
 	Resources.money = Resources.money - 1
+	self.animationSystem:enqueue(
+		Animation:new("moneyUpdated", "-1 Money", love.graphics.getWidth() / 2 - 100, 100, { 1, 0, 0 })
+	)
 	Resources.fuel = Resources.fuel - 1
+	self.animationSystem:enqueue(
+		Animation:new("fuelUpdated", "-1 fuel", love.graphics.getWidth() / 2 - 100, 100, { 1, 0, 0 })
+	)
 	local outcome = math.random()
 	if outcome < 0.1 then
 		Resources.signals = Resources.signals + 5
+		self.animationSystem:enqueue(
+			Animation:new("signalUpdated", "+5 Signals", love.graphics.getWidth() / 2 - 100, 100, { 0, 1, 0 })
+		)
 	end
 end, "-1 on hull, money, fuel on every move BUT 10% chance of +5 signal")
 
 --export out public components ie. the actual passengers
 local M = {
-	Trader,
-	Scientist,
-	Explorer,
-	FuelEater,
-	Scrapbot,
-	HitchhikerBlob,
-	SmugglerLizard,
-	CosmicGambler,
-	BreatherFungus,
-	Stargazer,
-	OxygenSniffer,
-	Peach,
+	-- Trader,
+	-- Scientist,
+	-- Explorer,
+	-- FuelEater,
+	-- Scrapbot,
+	-- HitchhikerBlob,
+	-- SmugglerLizard,
+	-- CosmicGambler,
+	-- BreatherFungus,
+	-- Stargazer,
+	-- OxygenSniffer,
+	-- Peach,
 	SpaceSlimy,
 	VomitBob,
 }
