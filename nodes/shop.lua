@@ -6,7 +6,7 @@ local ShopProducts = {
 		description = "+5 fuel",
 		cost = 5,
 		effect = function()
-			Resources.fuel = Resources.fuel + 5
+			updateResource("fuel", 5)
 		end,
 	},
 }

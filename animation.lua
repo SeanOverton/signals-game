@@ -118,11 +118,26 @@ function getResourceAnimation(animationSystem, eventName, x, y)
 end
 
 function registerAnimations(eventManager, animationSystem)
-	eventManager.on("fuelUpdated", getResourceAnimation(animationSystem, "fuelUpdated", 100, 40))
-	eventManager.on("oxygenUpdated", getResourceAnimation(animationSystem, "oxygenUpdated", 100, 80))
-	eventManager.on("moneyUpdated", getResourceAnimation(animationSystem, "moneyUpdated", 100, 120))
-	eventManager.on("hullUpdated", getResourceAnimation(animationSystem, "hullUpdated", 100, 160))
-	eventManager.on("signalsUpdated", getResourceAnimation(animationSystem, "signalUpdated", 100, 200))
+	eventManager.on(
+		"fuelUpdated",
+		getResourceAnimation(animationSystem, "fuelUpdated", 100, love.graphics.getHeight() / 6 * 1)
+	)
+	eventManager.on(
+		"oxygenUpdated",
+		getResourceAnimation(animationSystem, "oxygenUpdated", 100, love.graphics.getHeight() / 6 * 2)
+	)
+	eventManager.on(
+		"moneyUpdated",
+		getResourceAnimation(animationSystem, "moneyUpdated", 100, love.graphics.getHeight() / 6 * 3)
+	)
+	eventManager.on(
+		"hullUpdated",
+		getResourceAnimation(animationSystem, "hullUpdated", 100, love.graphics.getHeight() / 6 * 4)
+	)
+	eventManager.on(
+		"signalsUpdated",
+		getResourceAnimation(animationSystem, "signalUpdated", 100, love.graphics.getHeight() / 6 * 5)
+	)
 end
 
 Animation.registerResourceAnimations = registerAnimations
