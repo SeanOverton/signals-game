@@ -39,7 +39,8 @@ https://www.pixilart.com/draw
 
 - improve whole world by generating it from seed up front:
     - ✅ TL;DR — How to Make a Random World Feel Cohesive
-    - Pre-generate the map (fixed seed).
+    - ~~Pre-generate the map (fixed seed),~~ done
+    - Improve hints and minimap
     - Divide into regions, each with its own node biases.
     - Use visual and narrative transitions between regions.
     - Add clusters (micro-stories).
