@@ -127,8 +127,8 @@ local function drawHints(playerX, playerY, galaxy)
 		if node then
 			-- load a tiny icon (optional: cache these elsewhere for perf)
 			local icon = nil
-			if node.image and love.filesystem.getInfo(node.image) then
-				icon = love.graphics.newImage(node.image)
+			if node.config.image and love.filesystem.getInfo(node.config.image) then
+				icon = love.graphics.newImage(node.config.image)
 			end
 
 			local x = dir.posX
