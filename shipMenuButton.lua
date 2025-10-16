@@ -10,7 +10,7 @@ local ShipMenuButton = {
 
 function ShipMenuButton:load(modal, rocket)
 	love.graphics.print("Hull: " .. Resources.hull, 10, 200)
-	self.button = Button:new(10, 240, "Ship", 36, function()
+	self.button = Button:new(love.graphics.getWidth() - 200, 10, "Ship", 36, function()
 		modal:open(function()
 			local largeFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 96)
 			local smallFont = love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 32)

@@ -946,12 +946,12 @@ function love.draw()
 		parallax.draw()
 
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
-		love.graphics.print("Press ESC for Menu", 10, 10)
-		love.graphics.print(
-			"Use arrows to navigate",
-			love.graphics.getWidth() / 2 - 100,
-			love.graphics.getHeight() - 30
-		)
+		-- love.graphics.print("Press ESC for Menu", 10, 10)
+		-- love.graphics.print(
+		-- 	"Use arrows to navigate",
+		-- 	love.graphics.getWidth() / 2 - 100,
+		-- 	love.graphics.getHeight() - 30
+		-- )
 
 		drawMinimap()
 
