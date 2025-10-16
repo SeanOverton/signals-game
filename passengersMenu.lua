@@ -119,7 +119,7 @@ function Collectibles:draw()
 		local px = self.startX + col * self.spacing
 		local py = self.startY + row * 160
 
-		local SIZE = 100
+		local SIZE = 120
 
 		-- Load passenger image
 		local img = love.graphics.newImage(p.data.image)
@@ -135,7 +135,7 @@ function Collectibles:draw()
 		else
 			-- Label
 			love.graphics.setColor(1, 1, 1, 1)
-			love.graphics.print(p.data.name, px, py + img:getHeight() + 65)
+			love.graphics.print(p.data.name, px, py + SIZE / img:getHeight() + SIZE)
 		end
 
 		col = col + 1
