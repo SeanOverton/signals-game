@@ -958,14 +958,59 @@ function love.draw()
 		-- print resources
 		-- set bg as dark block colour rectangle behind text for readability
 		love.graphics.setColor(0, 0, 0, 0.9)
-		love.graphics.rectangle("fill", 0, 30, 200, 220)
+		love.graphics.rectangle("fill", 0, 30, 200, 350)
 		love.graphics.setColor(1, 1, 1, 1)
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 40))
-		love.graphics.print("Signals: " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 10, 40)
-		love.graphics.print("Fuel: " .. Resources.fuel, 10, 80)
-		love.graphics.print("Oxygen: " .. Resources.oxygen, 10, 120)
-		love.graphics.print("Money: " .. Resources.money, 10, 160)
-		love.graphics.print("Hull: " .. Resources.hull, 10, 200)
+		local resourceSignalsImage = love.graphics.newImage("assets/resourceSignals.png")
+		love.graphics.draw(
+			resourceSignalsImage,
+			10,
+			30,
+			0,
+			60 / resourceSignalsImage:getWidth(),
+			60 / resourceSignalsImage:getHeight()
+		)
+		love.graphics.print(": " .. Resources.signals .. "/" .. constants.SIGNAL_TOTAL_GOAL, 80, 40)
+		local resourceFuelImage = love.graphics.newImage("assets/resourceFuel.png")
+		love.graphics.draw(
+			resourceFuelImage,
+			10,
+			100,
+			0,
+			60 / resourceFuelImage:getWidth(),
+			60 / resourceFuelImage:getHeight()
+		)
+		love.graphics.print(": " .. Resources.fuel, 80, 110)
+		local resourceOxygenImage = love.graphics.newImage("assets/resourceOxygen.png")
+		love.graphics.draw(
+			resourceOxygenImage,
+			10,
+			170,
+			0,
+			60 / resourceOxygenImage:getWidth(),
+			60 / resourceOxygenImage:getHeight()
+		)
+		love.graphics.print(": " .. Resources.oxygen, 80, 180)
+		local resourceMoneyImage = love.graphics.newImage("assets/resourceMoney.png")
+		love.graphics.draw(
+			resourceMoneyImage,
+			10,
+			240,
+			0,
+			60 / resourceMoneyImage:getWidth(),
+			60 / resourceMoneyImage:getHeight()
+		)
+		love.graphics.print(": " .. Resources.money, 80, 250)
+		local resourceHullImage = love.graphics.newImage("assets/resourceHull.png")
+		love.graphics.draw(
+			resourceHullImage,
+			10,
+			310,
+			0,
+			60 / resourceHullImage:getWidth(),
+			60 / resourceHullImage:getHeight()
+		)
+		love.graphics.print(": " .. Resources.hull, 90, 320)
 		love.graphics.setFont(love.graphics.newFont("chonky-bits-font/ChonkyBitsFontRegular.otf", 26))
 
 		CurrentPassengers:draw()
